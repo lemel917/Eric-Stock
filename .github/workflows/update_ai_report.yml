@@ -143,8 +143,8 @@ jobs:
       - name: Upload quarterly report
         if: steps.check.outputs.run == 'true'
         run: |
-          git config --global user.email "voidful.stack@gmail.com"
-          git config --global user.name "Voidful"
+          git config --global user.email "godyc817@gmail.com"
+          git config --global user.name "Eric-YC"
 
           git add -A
           git commit -m "🔄 Quarterly health check ($(date -u '+%Y-%m-%d'))" || echo "No changes"
