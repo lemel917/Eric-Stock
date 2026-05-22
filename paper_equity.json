@@ -2,7 +2,7 @@
   "initial_capital": 1000000,
   "capital": 1000000,
   "start_date": "2026-05-22",
-  "positions": [],
+  "positions": {},
   "trades": [],
   "equity_curve": []
 }
