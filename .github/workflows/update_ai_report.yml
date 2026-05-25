@@ -86,8 +86,8 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config --global user.email "voidful.stack@gmail.com"
-          git config --global user.name "Voidful"
+          git config --global user.email "godyc817@gmail.com"
+          git config --global user.name "Eric-YC"
 
           git add -A
           git commit -m "📊 AI Report v8.5 + Paper Trading ($(date -u '+%Y-%m-%d'))" || echo "No changes"

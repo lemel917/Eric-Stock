@@ -3,8 +3,8 @@
 中期動量 + 板塊輪動的雙策略系統。v8.5 個股動量穩健底倉 + Sector Rotation v2 板塊資金流追蹤。
 美股前提（SPY/VIX/SOX）→ 板塊資金流選擇 → 板塊內選股。經 11 段歷史危機壓測 + 00981A 對標驗證。
 
-📊 **線上報表**：https://voidful.github.io/tw_stocker/stock_report.html
-📈 **Paper Trading**：https://voidful.github.io/tw_stocker/paper_trading.html
+📊 **線上報表**：https://lemel917.github.io/Eric-Stock/stock_report.html
+📈 **Paper Trading**：https://lemel917.github.io/Eric-Stock/paper_trading.html
 
 ---
 
