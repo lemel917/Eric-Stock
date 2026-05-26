@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Trading v8.5 — 2026-05-25</title>
+    <title>Paper Trading v8.5 — 2026-05-26</title>
     <meta name="description" content="TW Stocker v8.5 Paper Trading 實時績效追蹤">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
@@ -92,25 +92,25 @@
     <h1>📈 Paper Trading v8.5</h1>
     <p class="subtitle">
         <span class="badge badge-live">● LIVE</span>
-        起始日 2026-05-25 | 更新 2026-05-25 | 初始資金 200,000
+        起始日 2026-05-25 | 更新 2026-05-26 | 初始資金 200,000
     </p>
 
     <div class="metrics">
         <div class="metric">
             <div class="label">總權益</div>
-            <div class="value green">206,615</div>
+            <div class="value green">205,789</div>
         </div>
         <div class="metric">
             <div class="label">總報酬</div>
-            <div class="value green">+3.3%</div>
+            <div class="value green">+2.9%</div>
         </div>
         <div class="metric">
             <div class="label">年化報酬</div>
-            <div class="value green">+833.5%</div>
+            <div class="value green">+364.7%</div>
         </div>
         <div class="metric">
             <div class="label">最大回撤</div>
-            <div class="value red">0.0%</div>
+            <div class="value red">-0.4%</div>
         </div>
         <div class="metric">
             <div class="label">勝率</div>
@@ -138,63 +138,70 @@
     <div class="chart-box">
         <h2>🔓 目前持倉</h2>
         <table>
-            <tr><th>股票</th><th>進場價</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
+            <tr><th>股票</th><th>名稱</th><th>進場價</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
             
         <tr>
             <td><b>2327</b></td>
+            <td>YAGEO CORP</td>
             <td>629.0</td>
             <td>755.7</td>
             <td>534.0</td>
             <td>2026-05-25</td>
-            <td>0天</td>
+            <td>1天</td>
         </tr>
         <tr>
             <td><b>3481</b></td>
+            <td>INNOLUX CORPORATION</td>
             <td>44.7</td>
             <td>54.6</td>
             <td>37.2</td>
             <td>2026-05-25</td>
-            <td>0天</td>
+            <td>1天</td>
         </tr>
         <tr>
             <td><b>2454</b></td>
+            <td>MEDIATEK INC</td>
             <td>3860.0</td>
             <td>4927.0</td>
             <td>3059.8</td>
             <td>2026-05-25</td>
-            <td>0天</td>
+            <td>1天</td>
         </tr>
         <tr>
             <td><b>2303</b></td>
+            <td>UNITED MICRO ELECTRONICS</td>
             <td>114.0</td>
             <td>144.2</td>
             <td>91.3</td>
             <td>2026-05-25</td>
-            <td>0天</td>
+            <td>1天</td>
         </tr>
         <tr>
             <td><b>6415</b></td>
+            <td>SILERGY CORP</td>
             <td>562.0</td>
             <td>704.4</td>
             <td>455.2</td>
             <td>2026-05-25</td>
-            <td>0天</td>
+            <td>1天</td>
         </tr>
         <tr>
             <td><b>2408</b></td>
+            <td>NANYA TECHNOLOGY CORPORATION</td>
             <td>310.5</td>
             <td>401.9</td>
             <td>241.9</td>
             <td>2026-05-25</td>
-            <td>0天</td>
+            <td>1天</td>
         </tr>
         <tr>
             <td><b>6285</b></td>
+            <td>WNC CORPORATION</td>
             <td>296.0</td>
             <td>369.6</td>
             <td>240.8</td>
             <td>2026-05-25</td>
-            <td>0天</td>
+            <td>1天</td>
         </tr>
         </table>
     </div>
@@ -202,7 +209,7 @@
     <div class="chart-box">
         <h2>📋 近期交易（最近 30 筆）</h2>
         <table>
-            <tr><th>日期</th><th>股票</th><th>進場</th><th>出場</th><th>損益</th><th>原因</th><th>持有</th></tr>
+            <tr><th>日期</th><th>股票</th><th>名稱</th><th>進場</th><th>出場</th><th>損益</th><th>原因</th><th>持有</th></tr>
             
         </table>
     </div>
@@ -218,10 +225,10 @@ const ctx = document.getElementById('equityChart').getContext('2d');
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ["2026-05-25"],
+        labels: ["2026-05-25", "2026-05-26"],
         datasets: [{
             label: 'Paper Trading 權益',
-            data: [206615.0],
+            data: [206615.0, 205789.0],
             borderColor: '#60a5fa',
             backgroundColor: 'rgba(96, 165, 250, 0.1)',
             fill: true,
@@ -230,7 +237,7 @@ new Chart(ctx, {
             borderWidth: 2,
         }, {
             label: '初始資金',
-            data: [200000],
+            data: [200000, 200000],
             borderColor: '#475569',
             borderDash: [5, 5],
             fill: false,
