@@ -41,6 +41,32 @@ def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=2, ensure_ascii=False, default=str)
 
+def get_stock_names(tickers):
+    """用 yfinance 取得股票名稱，帶本地 JSON 快取。"""
+    import yfinance as yf
+    cache_file = os.path.join('data', 'stock_names_cache.json')
+    cache = {}
+    if os.path.exists(cache_file):
+        with open(cache_file, encoding='utf-8') as f:
+            cache = json.load(f)
+
+    to_fetch = [t for t in tickers if t not in cache]
+    for t in to_fetch:
+        try:
+            info = yf.Ticker(f"{t}.TW").info
+            name = info.get('shortName', '') or info.get('longName', t)
+            cache[t] = name
+        except Exception:
+            cache[t] = t  # fallback: 用代號本身
+
+    if to_fetch:
+        os.makedirs('data', exist_ok=True)
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
+
+    return {t: cache.get(t, t) for t in tickers}
+
+
 def get_current_prices(tickers):
     """用 yfinance 取得最新收盤價。"""
     import yfinance as yf
@@ -261,14 +287,21 @@ def generate_html(data):
 
     # 交易清單 (最近 30 筆)
     recent_trades = trades[-30:][::-1]
+
+    # 取得所有相關股票名稱
+    all_name_tickers = list(data['positions'].keys()) + [t['ticker'] for t in recent_trades]
+    stock_names = get_stock_names(list(set(all_name_tickers)))
+
     trades_html = ""
     for t in recent_trades:
         color = '#4ade80' if t['pnl'] > 0 else '#f87171'
         emoji = '🟢' if t['pnl'] > 0 else '🔴'
+        name = stock_names.get(t['ticker'], t['ticker'])
         trades_html += f"""
         <tr>
             <td>{t['exit_date']}</td>
             <td><b>{t['ticker']}</b></td>
+            <td>{name}</td>
             <td>{t['entry']:.1f}</td>
             <td>{t['exit']:.1f}</td>
             <td style="color:{color};font-weight:700">{t['pnl_pct']:+.1f}%</td>
@@ -279,9 +312,11 @@ def generate_html(data):
     # 持倉
     positions_html = ""
     for ticker, pos in data['positions'].items():
+        name = stock_names.get(ticker, ticker)
         positions_html += f"""
         <tr>
             <td><b>{ticker}</b></td>
+            <td>{name}</td>
             <td>{pos['entry']:.1f}</td>
             <td>{pos['tp']:.1f}</td>
             <td>{pos['sl']:.1f}</td>
@@ -290,7 +325,7 @@ def generate_html(data):
         </tr>"""
 
     if not positions_html:
-        positions_html = '<tr><td colspan="6" style="text-align:center;color:#888">目前無持倉</td></tr>'
+        positions_html = '<tr><td colspan="7" style="text-align:center;color:#888">目前無持倉</td></tr>'
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-TW">
@@ -432,7 +467,7 @@ def generate_html(data):
     <div class="chart-box">
         <h2>🔓 目前持倉</h2>
         <table>
-            <tr><th>股票</th><th>進場價</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
+            <tr><th>股票</th><th>名稱</th><th>進場價</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
             {positions_html}
         </table>
     </div>
@@ -440,7 +475,7 @@ def generate_html(data):
     <div class="chart-box">
         <h2>📋 近期交易（最近 30 筆）</h2>
         <table>
-            <tr><th>日期</th><th>股票</th><th>進場</th><th>出場</th><th>損益</th><th>原因</th><th>持有</th></tr>
+            <tr><th>日期</th><th>股票</th><th>名稱</th><th>進場</th><th>出場</th><th>損益</th><th>原因</th><th>持有</th></tr>
             {trades_html}
         </table>
     </div>
