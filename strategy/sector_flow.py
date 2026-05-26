@@ -72,10 +72,25 @@ for sector_name, info in SECTOR_MAP.items():
     for prefix in info['prefixes']:
         _PREFIX_TO_SECTOR[prefix] = sector_name
 
+# 個股板塊覆寫（prefix 規則不準的股票手動修正）
+# 台股 4 碼代號中，60-69 開頭混雜了石化、生技、金融等非科技公司
+SECTOR_OVERRIDE = {
+    '6505': 'traditional',    # 台塑化 → 石化傳產
+    '6446': 'biotech',        # 藥華藥 → 生技
+    '6239': 'semiconductor',  # 力成 → 半導體(封測)
+    '6116': 'electronics',    # 彩晶 → 電子(面板)
+    '6005': 'finance',        # 群益期 → 金融
+    '6176': 'electronics',    # 安碁資訊 → 資安/電子
+    '4142': 'biotech',        # 國光生 → 生技
+    '4743': 'biotech',        # 合一 → 生技
+    '1760': 'biotech',        # 寶齡富錦 → 生技
+    '1707': 'biotech',        # 葡萄王 → 生技
+}
+
 
 def classify_sector(ticker):
     """
-    根據台股代號前兩碼判斷板塊。
+    根據台股代號判斷板塊。優先查個股覆寫表，再用前兩碼規則。
 
     Parameters
     ----------
@@ -88,6 +103,10 @@ def classify_sector(ticker):
         板塊名稱（如 'semiconductor'），若無法分類則回傳 'traditional'
     """
     ticker_str = str(ticker)
+    # 優先查覆寫表（修正 prefix 規則不準的個股）
+    if ticker_str in SECTOR_OVERRIDE:
+        return SECTOR_OVERRIDE[ticker_str]
+    # 再用 prefix 規則
     if len(ticker_str) >= 2:
         prefix = ticker_str[:2]
         return _PREFIX_TO_SECTOR.get(prefix, 'traditional')

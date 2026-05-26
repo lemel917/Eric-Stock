@@ -30,8 +30,8 @@ class SectorRotationBacktester:
         initial_capital=1_000_000,
         position_size=0.10,
         tp_atr_mult=4.0,
-        sl_atr_mult=3.0,
-        max_hold_days=20,
+        sl_atr_mult=2.5,
+        max_hold_days=15,
         max_extend_days=10,
         top_sectors=3,
         stocks_per_sector=3,
@@ -42,6 +42,8 @@ class SectorRotationBacktester:
         buy_cost=0.001425,
         sell_cost=0.004425,
         slippage=0.001,
+        trailing_stop=True,
+        trailing_atr_mult=2.5,
     ):
         self.initial_capital = initial_capital
         self.position_size = position_size
@@ -58,6 +60,8 @@ class SectorRotationBacktester:
         self.buy_cost = buy_cost
         self.sell_cost = sell_cost
         self.slippage = slippage
+        self.trailing_stop = trailing_stop
+        self.trailing_atr_mult = trailing_atr_mult
 
     def _compute_atr(self, high_df, low_df, close_df, period=14):
         """計算 ATR。"""
@@ -134,20 +138,37 @@ class SectorRotationBacktester:
                 if pd.isna(current_close):
                     continue
 
+                # 更新最高價追蹤（用於 trailing stop）
+                if not pd.isna(current_high):
+                    trade['highest_since_entry'] = max(
+                        trade.get('highest_since_entry', trade['entry_price']),
+                        current_high
+                    )
+
+                # Trailing stop: 動態上調 SL（只升不降）
+                if self.trailing_stop and trade.get('atr_at_entry', 0) > 0:
+                    trailing_sl = (trade['highest_since_entry']
+                                   - trade['atr_at_entry'] * self.trailing_atr_mult)
+                    trade['sl_price'] = max(trade['sl_price'], trailing_sl)
+
                 exit_triggered = False
                 exit_price = 0
                 exit_reason = ""
 
-                # 停損 (gap-aware)
+                # 停損 / Trailing Stop (gap-aware)
                 if current_low <= trade['sl_price']:
                     exit_triggered = True
                     if not pd.isna(current_open) and current_open < trade['sl_price']:
                         exit_price = current_open
                     else:
                         exit_price = trade['sl_price']
-                    exit_reason = "🔴 停損"
-                # 停利 (gap-aware)
-                elif current_high >= trade['tp_price']:
+                    # 區分初始停損 vs trailing stop 觸發
+                    if self.trailing_stop and trade['sl_price'] > trade.get('initial_sl_price', 0):
+                        exit_reason = "🟡 移動停利"
+                    else:
+                        exit_reason = "🔴 停損"
+                # 停利 (trailing 模式下停用固定 TP，讓趨勢延伸)
+                elif not self.trailing_stop and current_high >= trade['tp_price']:
                     exit_triggered = True
                     if not pd.isna(current_open) and current_open > trade['tp_price']:
                         exit_price = current_open
@@ -269,13 +290,8 @@ class SectorRotationBacktester:
                 continue
 
             # 全部板塊都是負的 → 不進場
-            if (valid_flows <= self.sector_min_flow).all():
-                continue
-
-            # ★ 板塊動量地板：所有板塊 20d 平均回報 < -3% → 不進場
-            # (全面下跌時「跌最少的板塊」仍在跌)
-            sector_avg_flow = valid_flows.mean()
-            if sector_avg_flow < -0.03:
+            positive_sectors = (valid_flows > 0).sum()
+            if positive_sectors == 0:
                 continue
 
             # 排名取前 N 板塊
@@ -317,8 +333,8 @@ class SectorRotationBacktester:
             for sector_name, flow_score in selected_sectors:
                 sector_stocks = sector_tickers.get(sector_name, [])
 
-                # 過濾 Universe 內的股票
-                valid_stocks = []
+                # 過濾 Universe 內的股票，收集原始指標
+                raw_stocks = []
                 for ticker in sector_stocks:
                     if ticker not in close_df.columns:
                         continue
@@ -336,7 +352,6 @@ class SectorRotationBacktester:
                     if ticker in active_trades:
                         continue
 
-                    # 板塊內評分：momentum(20d) × 2 + trend(close > MA60) × 1
                     mom = mom_20d[ticker].iloc[i - 1] if ticker in mom_20d.columns else np.nan
                     ma60_val = ma_60[ticker].iloc[i - 1] if ticker in ma_60.columns else np.nan
 
@@ -344,9 +359,23 @@ class SectorRotationBacktester:
                         continue
 
                     trend_score = 1.0 if (not pd.isna(ma60_val) and close_val > ma60_val) else 0.0
-                    intra_score = mom * 2 + trend_score
+                    raw_stocks.append((ticker, mom, trend_score, close_val, sector_name))
 
-                    valid_stocks.append((ticker, intra_score, close_val, sector_name))
+                # 板塊內 rank 正規化：動量正規化到 0~1 再加權
+                valid_stocks = []
+                if len(raw_stocks) >= 2:
+                    mom_values = [s[1] for s in raw_stocks]
+                    mom_min = min(mom_values)
+                    mom_max = max(mom_values)
+                    mom_range = mom_max - mom_min if mom_max > mom_min else 1e-8
+                    for ticker, mom, trend_score, close_val, sn in raw_stocks:
+                        mom_norm = (mom - mom_min) / mom_range  # 0~1
+                        intra_score = mom_norm * 2 + trend_score * 1
+                        valid_stocks.append((ticker, intra_score, close_val, sn))
+                else:
+                    for ticker, mom, trend_score, close_val, sn in raw_stocks:
+                        intra_score = mom * 2 + trend_score
+                        valid_stocks.append((ticker, intra_score, close_val, sn))
 
                 # 板塊內排名
                 valid_stocks.sort(key=lambda x: x[1], reverse=True)
@@ -422,6 +451,9 @@ class SectorRotationBacktester:
                     'actual_cost': actual_cost,
                     'tp_price': tp_price,
                     'sl_price': sl_price,
+                    'initial_sl_price': sl_price,
+                    'atr_at_entry': ticker_atr if not pd.isna(ticker_atr) else 0,
+                    'highest_since_entry': entry_price,
                     'days_held': 0,
                     'sector': sector,
                     'regime_at_entry': macro_regime,

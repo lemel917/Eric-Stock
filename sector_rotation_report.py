@@ -72,18 +72,24 @@ def parse_args():
                         help='選取幾個板塊 (預設 3)')
     parser.add_argument('--stocks-per-sector', type=int, default=3,
                         help='每板塊選幾檔 (預設 3)')
-    parser.add_argument('--hold-days', type=int, default=20,
-                        help='最大持倉天數 (預設 20)')
+    parser.add_argument('--hold-days', type=int, default=15,
+                        help='最大持倉天數 (預設 15)')
     parser.add_argument('--tp-atr', type=float, default=4.0,
                         help='ATR 停利倍數 (預設 4.0)')
-    parser.add_argument('--sl-atr', type=float, default=3.0,
-                        help='ATR 停損倍數 (預設 3.0)')
+    parser.add_argument('--sl-atr', type=float, default=2.5,
+                        help='ATR 停損倍數 (預設 2.5)')
     parser.add_argument('--universe-size', type=int, default=60,
                         help='流動性 Universe 大小 (預設 60)')
     parser.add_argument('--compare', action='store_true',
                         help='與 0050 benchmark 比較')
     parser.add_argument('--capital', type=float, default=1_000_000,
                         help='起始資金 (預設 1,000,000)')
+    parser.add_argument('--trailing', action='store_true', default=True,
+                        help='啟用移動停利 (預設開啟)')
+    parser.add_argument('--no-trailing', dest='trailing', action='store_false',
+                        help='關閉移動停利')
+    parser.add_argument('--trailing-atr', type=float, default=2.5,
+                        help='移動停利 ATR 倍數 (預設 2.5)')
     return parser.parse_args()
 
 
@@ -128,6 +134,8 @@ def main():
         max_hold_days=args.hold_days,
         top_sectors=args.top_sectors,
         stocks_per_sector=args.stocks_per_sector,
+        trailing_stop=getattr(args, 'trailing', True),
+        trailing_atr_mult=getattr(args, 'trailing_atr', 2.5),
     )
 
     print(f"\n🔄 執行板塊輪動回測...")

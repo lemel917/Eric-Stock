@@ -90,10 +90,10 @@ class EventDrivenBacktester:
         賣出成本率（手續費 + 證交稅，預設 0.004425 = 0.1425% + 0.3%）
     """
 
-    def __init__(self, tp_pct=0.15, sl_pct=0.08, max_hold_days=20,
+    def __init__(self, tp_pct=0.15, sl_pct=0.08, max_hold_days=15,
                  initial_capital=1_000_000, position_size=0.10,
-                 tp_sl_mode='atr', tp_atr_mult=4.0, sl_atr_mult=3.0,
-                 trailing_stop=False, trailing_atr_mult=2.0,
+                 tp_sl_mode='atr', tp_atr_mult=4.0, sl_atr_mult=2.5,
+                 trailing_stop=True, trailing_atr_mult=2.5,
                  regime_filter=False, regime_graduated=False,
                  regime_floor=0.30,
                  gap_filter_atr=1.5,

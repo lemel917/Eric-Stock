@@ -1281,8 +1281,8 @@ def parse_args():
         help='ATR 模式停利倍數 (預設: 4.0)'
     )
     parser.add_argument(
-        '--sl-atr', type=float, default=3.0,
-        help='ATR 模式停損倍數 (預設: 3.0)'
+        '--sl-atr', type=float, default=2.5,
+        help='ATR 模式停損倍數 (預設: 2.5)'
     )
 
     # Trailing Stop
@@ -1291,8 +1291,8 @@ def parse_args():
         help='啟用移動停利 (Trailing Stop)，停用固定 TP，讓強趨勢延伸'
     )
     parser.add_argument(
-        '--trailing-atr', type=float, default=2.0,
-        help='移動停利 ATR 倍數 (預設: 2.0, 從最高點回落此倍數 ATR 觸發)'
+        '--trailing-atr', type=float, default=2.5,
+        help='移動停利 ATR 倍數 (預設: 2.5, 從最高點回落此倍數 ATR 觸發)'
     )
 
     # 選股
@@ -1307,8 +1307,8 @@ def parse_args():
 
     # 持倉
     parser.add_argument(
-        '--hold-days', type=int, default=20,
-        help='最大持倉交易日數 (預設: 20)'
+        '--hold-days', type=int, default=15,
+        help='最大持倉交易日數 (預設: 15)'
     )
 
     # 進場過濾器

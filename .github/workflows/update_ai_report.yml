@@ -15,11 +15,11 @@ on:
       sl_atr:
         description: 'ATR 停損倍數'
         required: false
-        default: '3.0'
+        default: '2.5'
       hold_days:
         description: '最大持倉天數'
         required: false
-        default: '20'
+        default: '15'
       top_k:
         description: '每日最多進場股票數'
         required: false
@@ -63,9 +63,11 @@ jobs:
             --regime-graduated \
             --breadth-regime \
             --regime-floor 0.10 \
+            --trailing \
+            --trailing-atr 2.5 \
             --tp-atr ${{ github.event.inputs.tp_atr || '4.0' }} \
-            --sl-atr ${{ github.event.inputs.sl_atr || '3.0' }} \
-            --hold-days ${{ github.event.inputs.hold_days || '20' }} \
+            --sl-atr ${{ github.event.inputs.sl_atr || '2.5' }} \
+            --hold-days ${{ github.event.inputs.hold_days || '15' }} \
             --top-k ${{ github.event.inputs.top_k || '7' }} \
             --gap-filter ${{ github.event.inputs.gap_filter || '1.5' }} \
             --days ${{ github.event.inputs.days || '1200' }}
