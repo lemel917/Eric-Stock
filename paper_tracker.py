@@ -42,27 +42,69 @@ def save_data(data):
         json.dump(data, f, indent=2, ensure_ascii=False, default=str)
 
 def get_stock_names(tickers):
-    """用 yfinance 取得股票名稱，帶本地 JSON 快取。"""
-    import yfinance as yf
+    """從 TWSE/TPEX open data 取得股票中文名稱，帶本地 JSON 快取（7天有效）。"""
+    import csv
+    import io
+    import urllib.request
+
     cache_file = os.path.join('data', 'stock_names_cache.json')
     cache = {}
+    cache_valid = False
+
     if os.path.exists(cache_file):
         with open(cache_file, encoding='utf-8') as f:
             cache = json.load(f)
+        # 檢查快取是否 7 天內
+        updated = cache.get('_updated', '')
+        if updated:
+            try:
+                days = (datetime.now() - datetime.fromisoformat(updated)).days
+                if days < 7:
+                    cache_valid = True
+            except Exception:
+                pass
 
-    to_fetch = [t for t in tickers if t not in cache]
-    for t in to_fetch:
-        try:
-            info = yf.Ticker(f"{t}.TW").info
-            name = info.get('shortName', '') or info.get('longName', t)
-            cache[t] = name
-        except Exception:
-            cache[t] = t  # fallback: 用代號本身
+    # 若快取有效且所有 ticker 都有對應名稱，直接回傳
+    if cache_valid and all(t in cache for t in tickers):
+        return {t: cache.get(t, t) for t in tickers}
 
-    if to_fetch:
-        os.makedirs('data', exist_ok=True)
-        with open(cache_file, 'w', encoding='utf-8') as f:
-            json.dump(cache, f, ensure_ascii=False, indent=2)
+    # 重新抓取完整名稱對照
+    try:
+        # TWSE 上市
+        url_twse = 'https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=open_data'
+        req = urllib.request.Request(url_twse, headers={'User-Agent': 'Mozilla/5.0'})
+        resp = urllib.request.urlopen(req, timeout=15)
+        text = resp.read().decode('utf-8-sig')
+        reader = csv.reader(io.StringIO(text))
+        next(reader)  # skip header
+        for row in reader:
+            if len(row) >= 3:
+                code = row[1].strip().strip('"')
+                name = row[2].strip().strip('"')
+                if code and name:
+                    cache[code] = name
+    except Exception as e:
+        print(f"   ⚠️ TWSE 名稱下載失敗: {e}")
+
+    try:
+        # TPEX 上櫃
+        url_tpex = 'https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes'
+        req = urllib.request.Request(url_tpex, headers={'User-Agent': 'Mozilla/5.0'})
+        resp = urllib.request.urlopen(req, timeout=15)
+        data = json.loads(resp.read().decode('utf-8'))
+        for item in data:
+            code = item.get('SecuritiesCompanyCode', '').strip()
+            name = item.get('CompanyName', '').strip()
+            if code and name:
+                cache[code] = name
+    except Exception as e:
+        print(f"   ⚠️ TPEX 名稱下載失敗: {e}")
+
+    # 儲存快取
+    cache['_updated'] = datetime.now().isoformat()
+    os.makedirs('data', exist_ok=True)
+    with open(cache_file, 'w', encoding='utf-8') as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2)
 
     return {t: cache.get(t, t) for t in tickers}
 
