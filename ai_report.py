@@ -97,6 +97,26 @@ EXTENDED_TICKERS = [
 EXTENDED_TICKERS = list(dict.fromkeys(EXTENDED_TICKERS))
 
 
+def load_extended_tickers():
+    """
+    載入股票池。若存在 delisted_tickers.csv，合併至候選池以減少存活者偏差。
+    CSV 格式: ticker,delist_date (delist_date 用於回測時動態排除)
+    """
+    tickers = list(dict.fromkeys(EXTENDED_TICKERS))
+    
+    delisted_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'delisted_tickers.csv')
+    if os.path.exists(delisted_path):
+        try:
+            dl_df = pd.read_csv(delisted_path)
+            delisted = dl_df['ticker'].astype(str).tolist()
+            tickers = list(dict.fromkeys(tickers + delisted))
+            print(f"   📋 已載入 {len(delisted)} 檔歷史下市股票 (減少存活者偏差)")
+        except Exception as e:
+            print(f"   ⚠️ 載入 delisted_tickers.csv 失敗: {e}")
+    
+    return tickers
+
+
 def get_next_n_trading_days(from_date, n_days):
     """
     使用 exchange_calendars 計算從 from_date 起的第 n 個交易日。
@@ -1054,6 +1074,10 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         <span class="config-badge">⏱️ 最長 {max_hold_days} 天</span>
         <span class="config-badge">💰 成本: {cost_desc}</span>
     </p>
+
+    <div style="background:#fff3cd;border:1px solid #ffc107;padding:10px;margin:10px 0;border-radius:4px;font-size:13px;">
+    ⚠️ <strong>存活者偏差警告:</strong> 股票池使用當前上市股票回測歷史期間。實際績效可能低於回測 2-5% (年化)。可提供 delisted_tickers.csv 減輕此偏差。
+    </div>
 
     <h2>📊 績效總覽</h2>
     <div class="stats">

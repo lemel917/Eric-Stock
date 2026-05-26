@@ -110,58 +110,90 @@ def fetch_us_signals(start_date=None, end_date=None, days=1500):
     return signals
 
 
-def _compute_macro_regime_series(signals):
+def _compute_macro_regime_series(signals, smooth_window=3, hysteresis_days=2):
     """
     計算每日的宏觀 regime 曝險比例。
 
-    v1.1 crisis-tuned (基於 11 段歷史危機分析):
-    - 弱勢期間 VIX 均值 30.3，門檻從 35 降到 28
-    - SPY + SOX 雙空 → 幾乎停止
-    - 復甦允許：VIX 25-28 + SPY > MA20 → 半倉
+    v1.2 — 加入 EMA 平滑 + 遲滯機制避免 whipsaw:
+    - 先計算 raw regime（同 v1.1 邏輯）
+    - 用 EMA(smooth_window) 平滑日間跳動
+    - 遲滯: regime 必須連續 hysteresis_days 天低於當前水位才降級
+           但上升（risk-on）允許立即生效（快進慢出）
 
-    VIX > 28                            → 0.0 (完全停止)
-    SPY↓(MA60) + SOX↓(MA60)            → 0.1 (雙空 = 最危險)
-    SPY↓ + VIX 25~28 + SPY > MA20      → 0.5 (復甦允許)
-    SPY↓ + VIX 25~28                    → 0.2
-    SPY↓ + VIX < 25                     → 0.4
-    SPY↑ + VIX 22~25                    → 0.7
-    SPY↑ + VIX < 22                     → 1.0
+    Parameters
+    ----------
+    signals : pd.DataFrame
+    smooth_window : int
+        EMA 平滑窗口 (預設 3 天)
+    hysteresis_days : int
+        降級需要的連續確認天數 (預設 2 天)
     """
-    regime = pd.Series(0.4, index=signals.index)
+    # ── 計算 raw regime（原 v1.1 邏輯） ──
+    raw_regime = pd.Series(0.4, index=signals.index)
 
     spy_trend = signals.get('spy_trend', pd.Series(1, index=signals.index))
     spy_short = signals.get('spy_short', pd.Series(1, index=signals.index))
     sox_trend = signals.get('sox_trend', pd.Series(1, index=signals.index))
     vix = signals.get('vix_close', pd.Series(20.0, index=signals.index))
 
-    # ── Layer 1: VIX 硬停止 (降到 28) ──
-    regime[vix > 28] = 0.0
+    # Layer 1: VIX 硬停止 (>28 仍然立即生效，不需確認)
+    raw_regime[vix > 28] = 0.0
 
-    # ── Layer 2: SPY + SOX 雙空 → 幾乎停止 ──
+    # Layer 2: SPY + SOX 雙空
     dual_bear = (spy_trend == 0) & (sox_trend == 0) & (vix <= 28)
-    regime[dual_bear] = 0.1
+    raw_regime[dual_bear] = 0.1
 
-    # ── Layer 3: SPY↓ + 中等 VIX ──
-    # SPY↓ + VIX 25~28 (中等恐慌)
+    # Layer 3: SPY↓ + 中等 VIX
     mask_down_mid_vix = (spy_trend == 0) & (vix >= 25) & (vix <= 28) & ~dual_bear
-    regime[mask_down_mid_vix] = 0.2
+    raw_regime[mask_down_mid_vix] = 0.2
 
-    # SPY↓ + VIX 25~28 + SPY > MA20 → 復甦允許 (避免擋住反彈)
     mask_recovery = mask_down_mid_vix & (spy_short == 1)
-    regime[mask_recovery] = 0.5
+    raw_regime[mask_recovery] = 0.5
 
-    # SPY↓ + VIX < 25 (溫和空頭)
     mask_down_low_vix = (spy_trend == 0) & (vix < 25) & ~dual_bear
-    regime[mask_down_low_vix] = 0.4
+    raw_regime[mask_down_low_vix] = 0.4
 
-    # ── Layer 4: SPY↑ ──
-    # SPY↑ + VIX 22~25
+    # Layer 4: SPY↑
     mask_up_mid_vix = (spy_trend == 1) & (vix >= 22) & (vix < 25)
-    regime[mask_up_mid_vix] = 0.7
+    raw_regime[mask_up_mid_vix] = 0.7
 
-    # SPY↑ + VIX < 22
     mask_up_low_vix = (spy_trend == 1) & (vix < 22)
-    regime[mask_up_low_vix] = 1.0
+    raw_regime[mask_up_low_vix] = 1.0
+
+    # ── EMA 平滑 ──
+    smoothed = raw_regime.ewm(span=smooth_window, adjust=False).mean()
+
+    # ── 遲滯機制：快進慢出 ──
+    # VIX > 28 是硬停止，不需遲滯
+    # 其他降級需確認 hysteresis_days 天
+    regime = smoothed.copy()
+    prev_regime = regime.iloc[0]
+    consecutive_down = 0
+
+    for idx in range(1, len(regime)):
+        current = smoothed.iloc[idx]
+        raw_current = raw_regime.iloc[idx]
+
+        # VIX > 28: 立即停止（硬規則不遲滯）
+        if raw_current == 0.0:
+            prev_regime = current
+            consecutive_down = 0
+            continue
+
+        # 上升（risk-on）: 立即允許
+        if current >= prev_regime:
+            regime.iloc[idx] = current
+            prev_regime = current
+            consecutive_down = 0
+        else:
+            # 下降: 需要連續確認
+            consecutive_down += 1
+            if consecutive_down >= hysteresis_days:
+                regime.iloc[idx] = current
+                prev_regime = current
+            else:
+                # 維持前值，不降級
+                regime.iloc[idx] = prev_regime
 
     return regime
 

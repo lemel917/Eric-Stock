@@ -49,9 +49,9 @@ def compute_risk_metrics(equity_df, trades_df, initial_capital=1_000_000, risk_f
     # === Sharpe Ratio ===
     sharpe = (ann_return - risk_free_rate) / ann_volatility if ann_volatility > 0 else 0
 
-    # === Sortino Ratio (只用下行波動) ===
-    downside_returns = daily_returns[daily_returns < 0]
-    downside_vol = downside_returns.std() * np.sqrt(trading_days_per_year) if len(downside_returns) > 0 else 0
+    # === Sortino Ratio (全樣本 downside deviation) ===
+    downside = np.minimum(daily_returns - risk_free_rate / trading_days_per_year, 0)
+    downside_vol = np.sqrt((downside ** 2).mean()) * np.sqrt(trading_days_per_year)
     sortino = (ann_return - risk_free_rate) / downside_vol if downside_vol > 0 else 0
 
     # === Max Drawdown ===
