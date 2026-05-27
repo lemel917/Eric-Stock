@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Trading v8.5 — 2026-05-27</title>
+    <meta name="description" content="TW Stocker v8.5 Paper Trading 實時績效追蹤">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .subtitle { color: #94a3b8; margin-bottom: 24px; font-size: 0.9rem; }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .metric {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .metric .label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; }
+        .metric .value { font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
+        .metric .value.green { color: #4ade80; }
+        .metric .value.red { color: #f87171; }
+        .metric .value.blue { color: #60a5fa; }
+        .chart-box {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .chart-box h2 { font-size: 1.1rem; margin-bottom: 12px; color: #cbd5e1; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 2px solid #334155;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #1e293b;
+        }
+        tr:hover { background: rgba(100, 116, 139, 0.1); }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .badge-live { background: #22c55e33; color: #4ade80; }
+        .disclaimer {
+            margin-top: 24px;
+            padding: 14px;
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: #fbbf24;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📈 Paper Trading v8.5</h1>
+    <p class="subtitle">
+        <span class="badge badge-live">● LIVE</span>
+        起始日 2026-05-27 | 更新 2026-05-27 | 初始資金 200,000
+    </p>
+
+    <div class="metrics">
+        <div class="metric">
+            <div class="label">總權益</div>
+            <div class="value green">204,862</div>
+        </div>
+        <div class="metric">
+            <div class="label">總報酬</div>
+            <div class="value green">+2.4%</div>
+        </div>
+        <div class="metric">
+            <div class="label">年化報酬</div>
+            <div class="value green">+612.6%</div>
+        </div>
+        <div class="metric">
+            <div class="label">最大回撤</div>
+            <div class="value red">0.0%</div>
+        </div>
+        <div class="metric">
+            <div class="label">勝率</div>
+            <div class="value blue">0%</div>
+        </div>
+        <div class="metric">
+            <div class="label">交易數</div>
+            <div class="value blue">0</div>
+        </div>
+        <div class="metric">
+            <div class="label">Profit Factor</div>
+            <div class="value red">0.00</div>
+        </div>
+        <div class="metric">
+            <div class="label">持倉數</div>
+            <div class="value blue">7</div>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <h2>權益曲線</h2>
+        <canvas id="equityChart" height="80"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h2>🔓 目前持倉</h2>
+        <table>
+            <tr><th>股票</th><th>名稱</th><th>進場價</th><th>當前股價</th><th>目前損益</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
+            
+        <tr>
+            <td><b>2327</b></td>
+            <td>國巨*</td>
+            <td>661.0</td>
+            <td>661.0</td>
+            <td style="color:#4ade80;font-weight:700">+0.0%</td>
+            <td>806.4</td>
+            <td>570.1</td>
+            <td>2026-05-27</td>
+            <td>0天</td>
+        </tr>
+        <tr>
+            <td><b>3481</b></td>
+            <td>群創</td>
+            <td>45.7</td>
+            <td>45.7</td>
+            <td style="color:#4ade80;font-weight:700">+0.0%</td>
+            <td>57.4</td>
+            <td>38.4</td>
+            <td>2026-05-27</td>
+            <td>0天</td>
+        </tr>
+        <tr>
+            <td><b>2303</b></td>
+            <td>聯電</td>
+            <td>130.5</td>
+            <td>130.5</td>
+            <td style="color:#4ade80;font-weight:700">+0.0%</td>
+            <td>162.7</td>
+            <td>110.4</td>
+            <td>2026-05-27</td>
+            <td>0天</td>
+        </tr>
+        <tr>
+            <td><b>2454</b></td>
+            <td>聯發科</td>
+            <td>4265.0</td>
+            <td>4265.0</td>
+            <td style="color:#4ade80;font-weight:700">+0.0%</td>
+            <td>5384.0</td>
+            <td>3565.6</td>
+            <td>2026-05-27</td>
+            <td>0天</td>
+        </tr>
+        <tr>
+            <td><b>6116</b></td>
+            <td>彩晶</td>
+            <td>13.6</td>
+            <td>13.6</td>
+            <td style="color:#4ade80;font-weight:700">+0.0%</td>
+            <td>16.5</td>
+            <td>11.9</td>
+            <td>2026-05-27</td>
+            <td>0天</td>
+        </tr>
+        <tr>
+            <td><b>6239</b></td>
+            <td>力成</td>
+            <td>342.0</td>
+            <td>342.0</td>
+            <td style="color:#4ade80;font-weight:700">+0.0%</td>
+            <td>411.7</td>
+            <td>298.4</td>
+            <td>2026-05-27</td>
+            <td>0天</td>
+        </tr>
+        <tr>
+            <td><b>6415</b></td>
+            <td>矽力*-KY</td>
+            <td>630.0</td>
+            <td>630.0</td>
+            <td style="color:#4ade80;font-weight:700">+0.0%</td>
+            <td>779.3</td>
+            <td>536.7</td>
+            <td>2026-05-27</td>
+            <td>0天</td>
+        </tr>
+        </table>
+    </div>
+
+    <div class="chart-box">
+        <h2>📋 近期交易（最近 30 筆）</h2>
+        <table>
+            <tr><th>日期</th><th>股票</th><th>名稱</th><th>進場</th><th>出場</th><th>損益</th><th>原因</th><th>持有</th></tr>
+            
+        </table>
+    </div>
+
+    <div class="disclaimer">
+        ⚠️ <b>免責聲明：</b>此為 Paper Trading 模擬績效，非真實交易。歷史模擬不代表未來報酬。
+        策略版本 v8.5 (Ablation-Proven)，含成本 0.58%/筆 + 10bps 滑價。投資有風險，決策請自行負責。
+    </div>
+</div>
+
+<script>
+const ctx = document.getElementById('equityChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ["2026-05-27"],
+        datasets: [{
+            label: 'Paper Trading 權益',
+            data: [204862.0],
+            borderColor: '#60a5fa',
+            backgroundColor: 'rgba(96, 165, 250, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 2,
+            borderWidth: 2,
+        }, {
+            label: '初始資金',
+            data: [200000],
+            borderColor: '#475569',
+            borderDash: [5, 5],
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 1,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { labels: { color: '#94a3b8' } },
+        },
+        scales: {
+            x: { ticks: { color: '#64748b', maxTicksLimit: 10 }, grid: { color: '#1e293b' } },
+            y: { ticks: { color: '#64748b', callback: v => (v/1000).toFixed(0)+'K' }, grid: { color: '#1e293b' } },
+        }
+    }
+});
+</script>
+</body>
+</html>
