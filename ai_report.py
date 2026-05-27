@@ -257,6 +257,17 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
     """
     print("📊 產出 AI 交易計畫與績效報表...")
 
+    # 載入股票中文名稱快取
+    import json as _json
+    _names_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'stock_names_cache.json')
+    _stock_names = {}
+    try:
+        if os.path.exists(_names_path):
+            with open(_names_path, encoding='utf-8') as _f:
+                _stock_names = _json.load(_f)
+    except Exception:
+        pass
+
     tp_pct = config['tp_pct']
     sl_pct = config['sl_pct']
     max_hold_days = config['max_hold_days']
@@ -477,7 +488,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         )
 
         trading_plan_rows += (
-            f'<tr><td>{ticker}</td><td>{score:.2f}</td>'
+            f'<tr><td>{ticker}</td><td>{_stock_names.get(ticker, "-")}</td><td>{score:.2f}</td>'
             f'<td>{price:.1f}</td><td>{status}</td><td>{plan}</td>'
             f'<td>{hist_badge}</td>{inst_badge}</tr>\n'
         )
@@ -502,7 +513,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         )
 
         trading_plan_rows += (
-            f'<tr style="opacity:0.6"><td>{ticker}</td><td>{score:.2f}</td>'
+            f'<tr style="opacity:0.6"><td>{ticker}</td><td>{_stock_names.get(ticker, "-")}</td><td>{score:.2f}</td>'
             f'<td>{price:.1f}</td><td>{status}</td><td>-</td>'
             f'<td>{hist_badge}</td>{inst_badge}</tr>\n'
         )
@@ -513,7 +524,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         price_str = f'{price:.1f}' if not pd.isna(price) else '-'
         inst_badge = '<td style="color:#555">-</td><td style="color:#555">-</td>'
         trading_plan_rows += (
-            f'<tr style="opacity:0.4"><td>{ticker}</td><td>{score:.2f}</td>'
+            f'<tr style="opacity:0.4"><td>{ticker}</td><td>{_stock_names.get(ticker, "-")}</td><td>{score:.2f}</td>'
             f'<td>{price_str}</td><td>{status}</td><td>-</td>'
             f'<td>-</td>{inst_badge}</tr>\n'
         )
@@ -1140,6 +1151,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         <thead>
             <tr>
                 <th>股票代號</th>
+                <th>名稱</th>
                 <th>AI 評分</th>
                 <th>今日收盤</th>
                 <th>操作狀態</th>
