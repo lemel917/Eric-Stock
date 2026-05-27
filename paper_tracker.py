@@ -236,6 +236,11 @@ def update_tracker(data):
     for t in to_close:
         del data['positions'][t]
 
+    # 3.5 更新持倉的當前股價（供 generate_html 顯示損益使用）
+    for ticker, pos in data['positions'].items():
+        if ticker in prices:
+            pos['current_price'] = prices[ticker]
+
     # 3. 記錄今日信號 & 開新倉
     if signals:
         data['daily_signals'].append({'date': today, 'tickers': signal_tickers})
@@ -355,11 +360,17 @@ def generate_html(data):
     positions_html = ""
     for ticker, pos in data['positions'].items():
         name = stock_names.get(ticker, ticker)
+        current_price = pos.get('current_price', pos['entry'])
+        pnl_pct = (current_price / pos['entry'] - 1) * 100
+        pnl_color = '#4ade80' if pnl_pct >= 0 else '#f87171'
+        pnl_sign = '+' if pnl_pct >= 0 else ''
         positions_html += f"""
         <tr>
             <td><b>{ticker}</b></td>
             <td>{name}</td>
             <td>{pos['entry']:.1f}</td>
+            <td>{current_price:.1f}</td>
+            <td style="color:{pnl_color};font-weight:700">{pnl_sign}{pnl_pct:.1f}%</td>
             <td>{pos['tp']:.1f}</td>
             <td>{pos['sl']:.1f}</td>
             <td>{pos['entry_date']}</td>
@@ -367,7 +378,7 @@ def generate_html(data):
         </tr>"""
 
     if not positions_html:
-        positions_html = '<tr><td colspan="7" style="text-align:center;color:#888">目前無持倉</td></tr>'
+        positions_html = '<tr><td colspan="9" style="text-align:center;color:#888">目前無持倉</td></tr>'
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-TW">
@@ -509,7 +520,7 @@ def generate_html(data):
     <div class="chart-box">
         <h2>🔓 目前持倉</h2>
         <table>
-            <tr><th>股票</th><th>名稱</th><th>進場價</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
+            <tr><th>股票</th><th>名稱</th><th>進場價</th><th>當前股價</th><th>目前損益</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
             {positions_html}
         </table>
     </div>
