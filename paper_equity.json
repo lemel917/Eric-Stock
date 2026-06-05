@@ -9,8 +9,8 @@
       "sl": 110.4,
       "entry_date": "2026-05-27",
       "shares": 124.0,
-      "day_count": 6,
-      "current_price": 125.0
+      "day_count": 7,
+      "current_price": 131.5
     },
     "2454": {
       "entry": 4265.0,
@@ -18,8 +18,8 @@
       "sl": 3565.6,
       "entry_date": "2026-05-27",
       "shares": 3.0,
-      "day_count": 6,
-      "current_price": 4430.0
+      "day_count": 7,
+      "current_price": 4300.0
     },
     "6239": {
       "entry": 342.0,
@@ -27,8 +27,8 @@
       "sl": 298.4,
       "entry_date": "2026-05-27",
       "shares": 34.0,
-      "day_count": 6,
-      "current_price": 354.0
+      "day_count": 7,
+      "current_price": 338.0
     },
     "6415": {
       "entry": 630.0,
@@ -36,8 +36,8 @@
       "sl": 536.7,
       "entry_date": "2026-05-27",
       "shares": 17.0,
-      "day_count": 6,
-      "current_price": 570.0
+      "day_count": 7,
+      "current_price": 582.0
     },
     "2327": {
       "entry": 846.0,
@@ -45,8 +45,8 @@
       "sl": 724.2,
       "entry_date": "2026-06-02",
       "shares": 16.0,
-      "day_count": 2,
-      "current_price": 743.0
+      "day_count": 3,
+      "current_price": 769.0
     },
     "6116": {
       "entry": 20.6,
@@ -54,8 +54,8 @@
       "sl": 18.0,
       "entry_date": "2026-06-02",
       "shares": 591.0,
-      "day_count": 2,
-      "current_price": 20.450000762939453
+      "day_count": 3,
+      "current_price": 18.450000762939453
     }
   },
   "closed_trades": [
@@ -145,6 +145,13 @@
       "capital": 132075.0,
       "n_positions": 6,
       "n_closed_today": 0
+    },
+    {
+      "date": "2026-06-05",
+      "equity": 205875.0,
+      "capital": 132075.0,
+      "n_positions": 6,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -230,6 +237,18 @@
         "2344",
         "2356",
         "6239"
+      ]
+    },
+    {
+      "date": "2026-06-05",
+      "tickers": [
+        "6116",
+        "2327",
+        "3149",
+        "3481",
+        "2356",
+        "6239",
+        "2344"
       ]
     }
   ]
