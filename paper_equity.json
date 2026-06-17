@@ -9,8 +9,8 @@
       "sl": 110.4,
       "entry_date": "2026-05-27",
       "shares": 124.0,
-      "day_count": 14,
-      "current_price": 141.0
+      "day_count": 15,
+      "current_price": 140.0
     },
     "2454": {
       "entry": 4265.0,
@@ -18,8 +18,8 @@
       "sl": 3565.6,
       "entry_date": "2026-05-27",
       "shares": 3.0,
-      "day_count": 14,
-      "current_price": 4560.0
+      "day_count": 15,
+      "current_price": 4460.0
     },
     "6239": {
       "entry": 342.0,
@@ -27,8 +27,8 @@
       "sl": 298.4,
       "entry_date": "2026-05-27",
       "shares": 34.0,
-      "day_count": 14,
-      "current_price": 346.5
+      "day_count": 15,
+      "current_price": 345.0
     },
     "2327": {
       "entry": 846.0,
@@ -36,8 +36,8 @@
       "sl": 724.2,
       "entry_date": "2026-06-02",
       "shares": 16.0,
-      "day_count": 10,
-      "current_price": 950.0
+      "day_count": 11,
+      "current_price": 984.0
     },
     "3149": {
       "entry": 86.8,
@@ -45,8 +45,8 @@
       "sl": 73.3,
       "entry_date": "2026-06-08",
       "shares": 175.0,
-      "day_count": 6,
-      "current_price": 88.0
+      "day_count": 7,
+      "current_price": 93.69999694824219
     },
     "6116": {
       "entry": 16.6,
@@ -54,8 +54,8 @@
       "sl": 13.3,
       "entry_date": "2026-06-08",
       "shares": 822.0,
-      "day_count": 6,
-      "current_price": 16.600000381469727
+      "day_count": 7,
+      "current_price": 18.25
     }
   },
   "closed_trades": [
@@ -222,6 +222,13 @@
     {
       "date": "2026-06-16",
       "equity": 210025.0,
+      "capital": 122835.0,
+      "n_positions": 6,
+      "n_closed_today": 0
+    },
+    {
+      "date": "2026-06-17",
+      "equity": 212448.0,
       "capital": 122835.0,
       "n_positions": 6,
       "n_closed_today": 0
@@ -405,6 +412,18 @@
         "3481",
         "6239",
         "2454",
+        "2882"
+      ]
+    },
+    {
+      "date": "2026-06-17",
+      "tickers": [
+        "2327",
+        "2344",
+        "3481",
+        "2408",
+        "1303",
+        "6239",
         "2882"
       ]
     }
