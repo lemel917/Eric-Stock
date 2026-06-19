@@ -129,13 +129,17 @@ def compute_breakout_rank(close_df, window=300, universe_mask=None):
     return rank_breakout
 
 
-def fetch_value_data(tickers, close_df):
+def fetch_value_data(tickers, close_df, point_in_time=True):
     """
     從 yfinance 取得 PE/PB 快照數據，填入 DataFrame。
 
-    注意：yfinance 的 .info 只提供最新快照，
-    無法取得歷史 PE/PB。因此我們用「靜態快照 + 價格變動反推」
-    來近似歷史 PB/PE。
+    注意：yfinance 的 .info 只提供最新快照，無法取得歷史 PE/PB。
+
+    FIX(81s): 過去版本用「今日 EPS/BPS」配每日收盤價反推整段歷史 PB/PE，
+    這在回測時等於偷看未來財報（look-ahead bias）。現預設 point_in_time=True，
+    只在「最後一個交易日(快照對應當下)」套用，歷史日期保持 NaN，避免污染回測。
+    若要接真正的歷史 PB/PE 請改接 point-in-time 財報資料源。
+    傳 point_in_time=False 可還原舊行為（僅供即時選股、不可用於歷史回測）。
 
     Parameters
     ----------
@@ -189,12 +193,21 @@ def fetch_value_data(tickers, close_df):
     pb_df = pd.DataFrame(np.nan, index=close_df.index, columns=close_df.columns)
     pe_df = pd.DataFrame(np.nan, index=close_df.index, columns=close_df.columns)
 
+    last_idx = close_df.index[-1]
     for t in close_df.columns:
         if t in bps_dict and bps_dict[t] > 0:
-            pb_df[t] = close_df[t] / bps_dict[t]
+            if point_in_time:
+                pb_df.loc[last_idx, t] = close_df[t].iloc[-1] / bps_dict[t]
+            else:
+                pb_df[t] = close_df[t] / bps_dict[t]
         if t in eps_dict and eps_dict[t] > 0:
-            pe_df[t] = close_df[t] / eps_dict[t]
+            if point_in_time:
+                pe_df.loc[last_idx, t] = close_df[t].iloc[-1] / eps_dict[t]
+            else:
+                pe_df[t] = close_df[t] / eps_dict[t]
 
+    if point_in_time:
+        print("   ⚠️ 價值因子僅套用於最新日(快照)，歷史保持 NaN 以避免前視偏差 (FIX 81s)")
     return pb_df, pe_df
 
 

@@ -91,7 +91,15 @@ def fetch_panel_data(tickers, days=800, start_date=None, end_date=None):
             temp_df = df[[col]]
 
         temp_df.columns = [str(c).replace('.TW', '') for c in temp_df.columns]
-        data[col] = temp_df.ffill()
+        if col == 'Volume':
+            # FIX(s5r): 成交量不可 ffill——停牌/下市日本就「無量」，
+            # 捏造成交量會讓動態 universe 誤以為該股可交易。缺值補 0。
+            data[col] = temp_df.fillna(0)
+        else:
+            # FIX(s5r): 價格只 ffill 有限天數，避免長期停牌/下市股被永久
+            # 前填成平盤「假裝存活」（survivorship 放大器）。超過 5 個交易日
+            # 仍無報價者回歸 NaN，後續 universe/回測會自動排除。
+            data[col] = temp_df.ffill(limit=5)
 
     print(f"   ✅ 下載完成，資料範圍：{data['Close'].index[0].strftime('%Y-%m-%d')}"
           f" → {data['Close'].index[-1].strftime('%Y-%m-%d')}"
@@ -99,7 +107,49 @@ def fetch_panel_data(tickers, days=800, start_date=None, end_date=None):
     return data['Close'], data['Open'], data['High'], data['Low'], data['Volume']
 
 
-def build_liquid_universe(close_df, vol_df, top_n=50, lookback=20):
+def load_delist_dates(path):
+    """讀取下市清單，回傳 {ticker: pd.Timestamp(delist_date)}。
+
+    FIX(vmn): 之前 delist_date 欄位從未被任何程式讀取，所謂「動態排除」未實作。
+    此函式提供 point-in-time 排除所需的下市日對照表。
+
+    注意：真正消除 survivorship bias 還需要「完整的下市股價歷史」，目前
+    delisted_tickers.csv 僅少數樣本，本機制只能排除清單內標的，仍需擴充資料。
+    """
+    import os
+    delist = {}
+    if not path or not os.path.exists(path):
+        return delist
+    try:
+        df = pd.read_csv(path)
+    except Exception:
+        return delist
+    if 'ticker' not in df.columns or 'delist_date' not in df.columns:
+        return delist
+    for _, row in df.iterrows():
+        d = pd.to_datetime(row['delist_date'], errors='coerce')
+        if pd.notna(d):
+            delist[str(row['ticker']).strip()] = d
+    return delist
+
+
+def apply_delist_mask(universe_mask, delist_dates):
+    """將下市日當天起的標的從 universe 剔除（point-in-time）。
+
+    FIX(vmn): 配合回測引擎於下市日強制平倉，避免用「當前仍存活」的股池
+    回測歷史而高估報酬。
+    """
+    if not delist_dates:
+        return universe_mask
+    mask = universe_mask.copy()
+    for ticker, d in delist_dates.items():
+        if ticker in mask.columns:
+            mask.loc[mask.index >= d, ticker] = False
+    return mask
+
+
+def build_liquid_universe(close_df, vol_df, top_n=50, lookback=20,
+                          delist_dates=None):
     """
     建立動態流動性 Universe。
 
@@ -115,6 +165,8 @@ def build_liquid_universe(close_df, vol_df, top_n=50, lookback=20):
         每日 universe 大小
     lookback : int
         成交額均值回溯期
+    delist_dates : dict, optional
+        {ticker: delist_date}，下市日當天起該股自 universe 剔除 (FIX vmn)
 
     Returns
     -------
@@ -129,8 +181,13 @@ def build_liquid_universe(close_df, vol_df, top_n=50, lookback=20):
     # 每日取 top_n
     universe_mask = turnover.rank(axis=1, ascending=False) <= top_n
 
-    # 確保 NaN 的位置不被選入
-    universe_mask = universe_mask & close_df.notna() & (close_df > 0)
+    # 確保 NaN / 無量(停牌) 的位置不被選入
+    # FIX(s5r): 加 vol_df > 0，停牌日(無真實成交量)不得入選，避免虛假流動性
+    universe_mask = (universe_mask & close_df.notna()
+                     & (close_df > 0) & (vol_df > 0))
+
+    # FIX(vmn): 下市日起強制剔除
+    universe_mask = apply_delist_mask(universe_mask, delist_dates)
 
     avg_size = universe_mask.sum(axis=1).mean()
     print(f"   ✅ 動態 Universe 建立完成，平均每日 {avg_size:.0f} 檔")

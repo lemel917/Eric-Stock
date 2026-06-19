@@ -20,6 +20,8 @@ import sys
 from datetime import datetime, date, timedelta
 import argparse
 
+import paper_common
+
 DATA_FILE = 'paper_equity.json'
 HTML_FILE = 'paper_trading.html'
 
@@ -133,42 +135,22 @@ def get_current_prices(tickers):
     return prices
 
 def extract_signals_from_report():
-    """從 stock_report.html 擷取今日買入信號。"""
-    report_path = 'stock_report.html'
-    if not os.path.exists(report_path):
-        return []
+    """從 stock_report.html 擷取今日買入信號。
 
-    with open(report_path) as f:
-        html = f.read()
-
-    # Format: <td>TICKER</td><td>SCORE</td><td>ENTRY</td><td>...建議買進...</td>
-    #         <td>停利: TP ... 停損: SL ...</td>
-    signals = []
-    rows = re.findall(r'<tr>(.*?)</tr>', html, re.DOTALL)
-    for row in rows:
-        if '建議買進' not in row:
-            continue
-        ticker_m = re.search(r'<td>(\d{4})</td>', row)
-        entry_m = re.findall(r'<td[^>]*>([\d\.]+)</td>', row)
-        tp_m = re.search(r'停利.*?>([\d\.]+)<', row)
-        sl_m = re.search(r'停損.*?>([\d\.]+)<', row)
-        if ticker_m and len(entry_m) >= 3 and tp_m and sl_m:
-            signals.append({
-                'ticker': ticker_m.group(1),
-                'entry': float(entry_m[2]),  # third number is entry price (1st=ticker, 2nd=score, 3rd=price)
-                'tp': float(tp_m.group(1)),
-                'sl': float(sl_m.group(1)),
-            })
-    return signals
+    FIX(4fv): 委派至 paper_common 的單一信號解析器，避免與 paper_trade 各寫
+    一份 regex 形成兩套不同步的真相來源。
+    """
+    return paper_common.extract_signals_from_report()
 
 def update_tracker(data):
     """主要更新邏輯：追蹤持倉、結算已平倉、記錄新信號。"""
     today = date.today().isoformat()
-    buy_cost_rate = 0.001425
-    sell_cost_rate = 0.004425
-    slippage = 0.001
-    max_hold = 20
-    position_size = 0.10
+    # FIX(4fv): 改用 paper_common 共用參數（max_hold 由 20 修正為 15，對齊回測）
+    buy_cost_rate = paper_common.BUY_COST_RATE
+    sell_cost_rate = paper_common.SELL_COST_RATE
+    slippage = paper_common.SLIPPAGE
+    max_hold = paper_common.MAX_HOLD_DAYS
+    position_size = paper_common.POSITION_SIZE
 
     print(f"📊 Paper Tracker 更新 ({today})")
     print(f"   初始資金: {data['initial_capital']:,.0f}")
