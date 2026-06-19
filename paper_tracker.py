@@ -350,6 +350,7 @@ def generate_html(data):
         <tr>
             <td><b>{ticker}</b></td>
             <td>{name}</td>
+            <td>{int(pos.get('shares', 0)):,}</td>
             <td>{pos['entry']:.1f}</td>
             <td>{current_price:.1f}</td>
             <td style="color:{pnl_color};font-weight:700">{pnl_sign}{pnl_pct:.1f}%</td>
@@ -360,7 +361,7 @@ def generate_html(data):
         </tr>"""
 
     if not positions_html:
-        positions_html = '<tr><td colspan="9" style="text-align:center;color:#7a6a52">目前無持倉</td></tr>'
+        positions_html = '<tr><td colspan="10" style="text-align:center;color:#7a6a52">目前無持倉</td></tr>'
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-TW">
@@ -556,7 +557,7 @@ def generate_html(data):
     <div class="chart-box">
         <h2>🔓 目前持倉</h2>
         <table>
-            <tr><th>股票</th><th>名稱</th><th>進場價</th><th>當前股價</th><th>目前損益</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
+            <tr><th>股票</th><th>名稱</th><th>股數</th><th>進場價</th><th>當前股價</th><th>目前損益</th><th>停利</th><th>停損</th><th>進場日</th><th>持有</th></tr>
             {positions_html}
         </table>
     </div>
