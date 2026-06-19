@@ -323,7 +323,7 @@ def generate_html(data):
 
     trades_html = ""
     for t in recent_trades:
-        color = '#4ade80' if t['pnl'] > 0 else '#f87171'
+        color = '#2f7d4f' if t['pnl'] > 0 else '#b4452f'
         emoji = '🟢' if t['pnl'] > 0 else '🔴'
         name = stock_names.get(t['ticker'], t['ticker'])
         trades_html += f"""
@@ -344,7 +344,7 @@ def generate_html(data):
         name = stock_names.get(ticker, ticker)
         current_price = pos.get('current_price', pos['entry'])
         pnl_pct = (current_price / pos['entry'] - 1) * 100
-        pnl_color = '#4ade80' if pnl_pct >= 0 else '#f87171'
+        pnl_color = '#2f7d4f' if pnl_pct >= 0 else '#b4452f'
         pnl_sign = '+' if pnl_pct >= 0 else ''
         positions_html += f"""
         <tr>
@@ -360,7 +360,7 @@ def generate_html(data):
         </tr>"""
 
     if not positions_html:
-        positions_html = '<tr><td colspan="9" style="text-align:center;color:#888">目前無持倉</td></tr>'
+        positions_html = '<tr><td colspan="9" style="text-align:center;color:#7a6a52">目前無持倉</td></tr>'
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-TW">
@@ -371,83 +371,137 @@ def generate_html(data):
     <meta name="description" content="TW Stocker v8.5 Paper Trading 實時績效追蹤">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        :root {{
+            --bg: #f0e4cc;
+            --surface: #faf4e6;
+            --surface-2: #f3e8d0;
+            --surface-hover: #f6edd8;
+            --border: rgba(120,88,46,0.18);
+            --border-strong: rgba(120,88,46,0.34);
+            --text: #3a2c1d;
+            --text-dim: #7a6a52;
+            --accent: #9c6b3f;
+            --accent-2: #5f3c20;
+            --gain: #2f7d4f;
+            --loss: #b4452f;
+            --warn: #b5852a;
+            --radius: 16px;
+            --shadow: 0 1px 2px rgba(80,52,24,0.10), 0 12px 30px rgba(80,52,24,0.13);
+        }}
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        html {{ -webkit-text-size-adjust: 100%; }}
         body {{
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #e2e8f0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+            background:
+                repeating-linear-gradient(91deg, rgba(120,82,40,0.022) 0 1px, transparent 1px 9px),
+                radial-gradient(1100px 520px at 50% -8%, rgba(156,107,63,0.16), transparent 60%),
+                linear-gradient(165deg, #f4ead7 0%, #e7d6b6 100%);
+            background-attachment: fixed;
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 28px 20px 64px;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum" 1;
+            -webkit-font-smoothing: antialiased;
         }}
-        .container {{ max-width: 1000px; margin: 0 auto; }}
+        .container {{ max-width: 1040px; margin: 0 auto; }}
         h1 {{
-            font-size: 1.8rem;
-            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            font-size: clamp(1.55rem, 5vw, 2rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(95deg, var(--accent), var(--accent-2));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }}
-        .subtitle {{ color: #94a3b8; margin-bottom: 24px; font-size: 0.9rem; }}
+        .subtitle {{
+            color: var(--text-dim); margin-bottom: 26px; font-size: 0.9rem;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+        }}
         .metrics {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 12px;
             margin-bottom: 24px;
         }}
         .metric {{
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
+            background: linear-gradient(160deg, var(--surface), var(--surface-2));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            position: relative;
+            overflow: hidden;
+            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
         }}
-        .metric .label {{ color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; }}
-        .metric .value {{ font-size: 1.5rem; font-weight: 700; margin-top: 4px; }}
-        .metric .value.green {{ color: #4ade80; }}
-        .metric .value.red {{ color: #f87171; }}
-        .metric .value.blue {{ color: #60a5fa; }}
+        .metric::before {{
+            content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: var(--accent);
+        }}
+        .metric:hover {{
+            transform: translateY(-2px);
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow);
+        }}
+        .metric .label {{
+            color: var(--text-dim); font-size: 0.72rem;
+            text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;
+        }}
+        .metric .value {{ font-size: 1.5rem; font-weight: 700; margin-top: 4px; letter-spacing: -0.01em; }}
+        .metric .value.green {{ color: var(--gain); }}
+        .metric .value.red {{ color: var(--loss); }}
+        .metric .value.blue {{ color: var(--accent); }}
         .chart-box {{
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 12px;
+            background: linear-gradient(160deg, var(--surface), var(--surface-2));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 20px;
             margin-bottom: 24px;
         }}
-        .chart-box h2 {{ font-size: 1.1rem; margin-bottom: 12px; color: #cbd5e1; }}
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
+        .chart-box h2 {{
+            font-size: 1.05rem; margin-bottom: 14px; color: var(--text); font-weight: 700;
+            padding-left: 12px; position: relative;
         }}
+        .chart-box h2::before {{
+            content: ""; position: absolute; left: 0; top: 0.15em; bottom: 0.15em;
+            width: 4px; border-radius: 4px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+        }}
+        table {{ width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; }}
         th {{
-            text-align: left;
-            padding: 8px 10px;
-            border-bottom: 2px solid #334155;
-            color: #94a3b8;
-            font-weight: 600;
+            text-align: left; padding: 10px 12px;
+            border-bottom: 2px solid var(--border-strong);
+            color: var(--text-dim); font-weight: 600;
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px;
+            white-space: nowrap;
         }}
-        td {{
-            padding: 8px 10px;
-            border-bottom: 1px solid #1e293b;
-        }}
-        tr:hover {{ background: rgba(100, 116, 139, 0.1); }}
+        td {{ padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }}
+        tbody tr {{ transition: background .12s ease; }}
+        tr:hover {{ background: var(--surface-hover); }}
+        td b {{ color: var(--text); font-weight: 600; }}
         .badge {{
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 700;
+            display: inline-flex; align-items: center;
+            padding: 3px 10px; border-radius: 999px;
+            font-size: 0.7rem; font-weight: 700;
         }}
-        .badge-live {{ background: #22c55e33; color: #4ade80; }}
+        .badge-live {{
+            background: rgba(47,125,79,0.14); color: var(--gain);
+            border: 1px solid rgba(47,125,79,0.35);
+        }}
         .disclaimer {{
-            margin-top: 24px;
-            padding: 14px;
-            background: rgba(251, 191, 36, 0.08);
-            border: 1px solid rgba(251, 191, 36, 0.2);
-            border-radius: 8px;
-            font-size: 0.75rem;
-            color: #fbbf24;
+            margin-top: 28px; padding: 16px;
+            background: rgba(181,133,42,0.10);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--warn);
+            border-radius: 12px;
+            font-size: 0.78rem; color: var(--text-dim);
+        }}
+        @media (max-width: 720px) {{
+            body {{ padding: 18px 12px 48px; }}
+            .chart-box {{ padding: 16px 14px; }}
+            table {{ display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }}
+            .metric .value {{ font-size: 1.35rem; }}
         }}
     </style>
 </head>
@@ -530,8 +584,8 @@ new Chart(ctx, {{
         datasets: [{{
             label: 'Paper Trading 權益',
             data: {equity_json},
-            borderColor: '#60a5fa',
-            backgroundColor: 'rgba(96, 165, 250, 0.1)',
+            borderColor: '#9c6b3f',
+            backgroundColor: 'rgba(156, 107, 63, 0.16)',
             fill: true,
             tension: 0.3,
             pointRadius: 2,
@@ -539,7 +593,7 @@ new Chart(ctx, {{
         }}, {{
             label: '初始資金',
             data: {benchmark_json},
-            borderColor: '#475569',
+            borderColor: '#b9a07c',
             borderDash: [5, 5],
             fill: false,
             pointRadius: 0,
@@ -549,11 +603,11 @@ new Chart(ctx, {{
     options: {{
         responsive: true,
         plugins: {{
-            legend: {{ labels: {{ color: '#94a3b8' }} }},
+            legend: {{ labels: {{ color: '#5a4a36' }} }},
         }},
         scales: {{
-            x: {{ ticks: {{ color: '#64748b', maxTicksLimit: 10 }}, grid: {{ color: '#1e293b' }} }},
-            y: {{ ticks: {{ color: '#64748b', callback: v => (v/1000).toFixed(0)+'K' }}, grid: {{ color: '#1e293b' }} }},
+            x: {{ ticks: {{ color: '#7a6a52', maxTicksLimit: 10 }}, grid: {{ color: 'rgba(120,90,50,0.15)' }} }},
+            y: {{ ticks: {{ color: '#7a6a52', callback: v => (v/1000).toFixed(0)+'K' }}, grid: {{ color: 'rgba(120,90,50,0.15)' }} }},
         }}
     }}
 }});

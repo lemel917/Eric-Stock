@@ -179,11 +179,11 @@ def _build_inst_section():
         bar_width = min(change * 8, 100)
         buy_rows += (
             f'<tr>'
-            f'<td style="text-align:center;color:#888;">{i}</td>'
+            f'<td style="text-align:center;color:#7a6a52;">{i}</td>'
             f'<td><b>{code}</b> {name}</td>'
-            f'<td style="text-align:right;color:#00ff00;font-weight:bold;">+{change:.1f}%</td>'
+            f'<td style="text-align:right;color:#2f7d4f;font-weight:bold;">+{change:.1f}%</td>'
             f'<td style="text-align:right;">{ratio:.1f}%</td>'
-            f'<td><div style="background:linear-gradient(90deg,#00ff0044 {bar_width}%,transparent {bar_width}%);'
+            f'<td><div style="background:linear-gradient(90deg,#2f7d4f44 {bar_width}%,transparent {bar_width}%);'
             f'height:18px;border-radius:3px;"></div></td>'
             f'</tr>\n'
         )
@@ -198,11 +198,11 @@ def _build_inst_section():
         bar_width = min(abs(change) * 8, 100)
         sell_rows += (
             f'<tr>'
-            f'<td style="text-align:center;color:#888;">{i}</td>'
+            f'<td style="text-align:center;color:#7a6a52;">{i}</td>'
             f'<td><b>{code}</b> {name}</td>'
-            f'<td style="text-align:right;color:#ff4444;font-weight:bold;">-{abs(change):.1f}%</td>'
+            f'<td style="text-align:right;color:#b4452f;font-weight:bold;">-{abs(change):.1f}%</td>'
             f'<td style="text-align:right;">{ratio:.1f}%</td>'
-            f'<td><div style="background:linear-gradient(90deg,#ff444444 {bar_width}%,transparent {bar_width}%);'
+            f'<td><div style="background:linear-gradient(90deg,#b4452f44 {bar_width}%,transparent {bar_width}%);'
             f'height:18px;border-radius:3px;"></div></td>'
             f'</tr>\n'
         )
@@ -210,11 +210,11 @@ def _build_inst_section():
     html = f"""
     <h2>🏛️ 三大法人籌碼動態</h2>
     <p class="section-note">
-        近 20 日三大法人（外資+投信+自營商）持股比重變化排名。Data: <a href="https://github.com/voidful/tw-institutional-stocker" style="color:#4FC3F7;">tw-institutional-stocker</a>
+        近 20 日三大法人（外資+投信+自營商）持股比重變化排名。Data: <a href="https://github.com/voidful/tw-institutional-stocker" style="color:#9c6b3f;">tw-institutional-stocker</a>
     </p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div class="split-grid">
         <div>
-            <h3 style="color:#00ff00;margin-bottom:8px;">🟢 法人買超 Top-15（20日）</h3>
+            <h3 style="color:#2f7d4f;margin-bottom:8px;">🟢 法人買超 Top-15（20日）</h3>
             <table style="width:100%;">
                 <thead><tr>
                     <th style="width:30px;">#</th>
@@ -227,7 +227,7 @@ def _build_inst_section():
             </table>
         </div>
         <div>
-            <h3 style="color:#ff4444;margin-bottom:8px;">🔴 法人賣超 Top-15（20日）</h3>
+            <h3 style="color:#b4452f;margin-bottom:8px;">🔴 法人賣超 Top-15（20日）</h3>
             <table style="width:100%;">
                 <thead><tr>
                     <th style="width:30px;">#</th>
@@ -300,26 +300,37 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
     # ATR 顯示計算已抽出為模組層級的 compute_display_atr()
 
     # === 繪製資金曲線（含 Benchmark） ===
-    plt.style.use('dark_background')
+    plt.style.use('default')
     fig, axes = plt.subplots(2, 1, figsize=(14, 9), height_ratios=[3, 1],
                               gridspec_kw={'hspace': 0.25})
 
     ax1, ax2 = axes
 
+    # 木質淺色主題（與報表頁面一致）
+    _paper = '#faf4e6'
+    fig.patch.set_facecolor(_paper)
+    for _ax in (ax1, ax2):
+        _ax.set_facecolor(_paper)
+        _ax.tick_params(colors='#3a2c1d')
+        for _sp in _ax.spines.values():
+            _sp.set_color('#d8c5a0')
+        _ax.yaxis.label.set_color('#3a2c1d')
+        _ax.xaxis.label.set_color('#3a2c1d')
+
     # 主圖：策略 + Benchmark
-    ax1.plot(equity_df.index, equity_df['Equity'], color='#00e5ff', lw=2, label='Strategy')
-    ax1.axhline(initial_capital, color='#555', linestyle='--', alpha=0.5, label='Initial Capital')
+    ax1.plot(equity_df.index, equity_df['Equity'], color='#9c6b3f', lw=2, label='Strategy')
+    ax1.axhline(initial_capital, color='#9a8a6e', linestyle='--', alpha=0.5, label='Initial Capital')
     ax1.fill_between(equity_df.index, initial_capital, equity_df['Equity'],
-                     where=equity_df['Equity'] >= initial_capital, alpha=0.1, color='#00e5ff')
+                     where=equity_df['Equity'] >= initial_capital, alpha=0.1, color='#9c6b3f')
     ax1.fill_between(equity_df.index, initial_capital, equity_df['Equity'],
-                     where=equity_df['Equity'] < initial_capital, alpha=0.1, color='#ff4444')
+                     where=equity_df['Equity'] < initial_capital, alpha=0.1, color='#b4452f')
 
     if benchmark_equity is not None and len(benchmark_equity) > 0:
         # 將 benchmark 縮放到同一起始資金
         common_idx = equity_df.index.intersection(benchmark_equity.index)
         if len(common_idx) > 0:
             bench_scaled = benchmark_equity.loc[common_idx] * initial_capital
-            ax1.plot(common_idx, bench_scaled, color='#ffab00', lw=1.5, alpha=0.8,
+            ax1.plot(common_idx, bench_scaled, color='#b5852a', lw=1.5, alpha=0.9,
                      label='0050 Buy & Hold', linestyle='--')
 
     if ew_equity is not None and len(ew_equity) > 0:
@@ -333,13 +344,13 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         common_idx = equity_df.index.intersection(benchmark2_equity.index)
         if len(common_idx) > 0:
             bench2_scaled = benchmark2_equity.loc[common_idx] * initial_capital
-            ax1.plot(common_idx, bench2_scaled, color='#69f0ae', lw=1.5, alpha=0.8,
+            ax1.plot(common_idx, bench2_scaled, color='#2a8c7a', lw=1.6, alpha=0.9,
                      label='00981A Buy & Hold', linestyle='-.')
 
     mode_label = f"ATR×{config.get('tp_atr_mult', 3)}/{config.get('sl_atr_mult', 1.5)}" \
         if tp_sl_mode == 'atr' else f"TP +{tp_pct*100:.0f}% / SL -{sl_pct*100:.0f}%"
     ax1.set_title(f'AI Quant v8  |  {mode_label}  |  Top-{top_k}  |  Hold ≤{max_hold_days}D',
-                  fontweight='bold', fontsize=14, color='#fff')
+                  fontweight='bold', fontsize=14, color='#3a2c1d')
     ax1.set_ylabel('Portfolio Value (TWD)', fontsize=11)
     ax1.legend(fontsize=9, loc='upper left')
     ax1.grid(alpha=0.15)
@@ -348,15 +359,15 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
     equity = equity_df['Equity']
     cummax = equity.cummax()
     drawdown = (equity / cummax - 1) * 100
-    ax2.fill_between(drawdown.index, 0, drawdown, color='#ff4444', alpha=0.4)
-    ax2.plot(drawdown.index, drawdown, color='#ff4444', lw=1)
+    ax2.fill_between(drawdown.index, 0, drawdown, color='#b4452f', alpha=0.4)
+    ax2.plot(drawdown.index, drawdown, color='#b4452f', lw=1)
     ax2.set_ylabel('Drawdown (%)', fontsize=10)
     ax2.set_xlabel('')
     ax2.grid(alpha=0.15)
     ax2.set_ylim(drawdown.min() * 1.2, 2)
 
     fig.tight_layout()
-    fig.savefig('backtest_chart.png', dpi=150, bbox_inches='tight', facecolor='#121212')
+    fig.savefig('backtest_chart.png', dpi=150, bbox_inches='tight', facecolor='#faf4e6')
     plt.close(fig)
     print("   📈 資金曲線已存為 backtest_chart.png")
 
@@ -438,49 +449,49 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
                 sl_pct_display = (1 - sl_price / price) * 100
                 # 合理性檢查
                 if tp_pct_display > 50 or sl_pct_display > 50:
-                    plan = '<span style="color:#ff4444">⚠️ ATR 異常，信號無效</span>'
+                    plan = '<span style="color:#b4452f">⚠️ ATR 異常，信號無效</span>'
                 else:
                     time_exit = get_next_n_trading_days(latest_date, max_hold_days)
-                    plan = (f'<b>停利:</b> <span style="color:#00ff00">{tp_price:.1f}</span>'
+                    plan = (f'<b>停利:</b> <span style="color:#2f7d4f">{tp_price:.1f}</span>'
                             f' (+{tp_pct_display:.1f}%) '
-                            f'<br><b>停損:</b> <span style="color:#ff4444">{sl_price:.1f}</span>'
+                            f'<br><b>停損:</b> <span style="color:#b4452f">{sl_price:.1f}</span>'
                             f' (-{sl_pct_display:.1f}%) '
                             f'<br><b>最晚出場:</b> {time_exit}')
             else:
                 tp_price = price * (1 + tp_pct)
                 sl_price = price * (1 - sl_pct)
                 time_exit = get_next_n_trading_days(latest_date, max_hold_days)
-                plan = (f'<b>停利:</b> <span style="color:#00ff00">{tp_price:.1f}</span>'
+                plan = (f'<b>停利:</b> <span style="color:#2f7d4f">{tp_price:.1f}</span>'
                         f' (+{tp_pct*100:.1f}%) '
-                        f'<br><b>停損:</b> <span style="color:#ff4444">{sl_price:.1f}</span>'
+                        f'<br><b>停損:</b> <span style="color:#b4452f">{sl_price:.1f}</span>'
                         f' (-{sl_pct*100:.1f}%) '
                         f'<br><b>最晚出場:</b> {time_exit}')
         else:
             tp_price = price * (1 + tp_pct)
             sl_price = price * (1 - sl_pct)
             time_exit = get_next_n_trading_days(latest_date, max_hold_days)
-            plan = (f'<b>停利:</b> <span style="color:#00ff00">{tp_price:.1f}</span>'
+            plan = (f'<b>停利:</b> <span style="color:#2f7d4f">{tp_price:.1f}</span>'
                     f' (+{tp_pct*100:.1f}%) '
-                    f'<br><b>停損:</b> <span style="color:#ff4444">{sl_price:.1f}</span>'
+                    f'<br><b>停損:</b> <span style="color:#b4452f">{sl_price:.1f}</span>'
                     f' (-{sl_pct*100:.1f}%) '
                     f'<br><b>最晚出場:</b> {time_exit}')
 
-        status = f'<span style="color:#00ff00; font-weight:bold;">🟢 建議買進 #{rank}</span>'
+        status = f'<span style="color:#2f7d4f; font-weight:bold;">🟢 建議買進 #{rank}</span>'
 
         # Per-stock 歷史績效
         ss = stock_stats.get(ticker, None)
         if ss and ss['trades'] >= 2:
-            wr_color = '#00ff00' if ss['win_rate'] >= 50 else '#ff4444'
-            ar_color = '#00ff00' if ss['avg_return'] > 0 else '#ff4444'
+            wr_color = '#2f7d4f' if ss['win_rate'] >= 50 else '#b4452f'
+            ar_color = '#2f7d4f' if ss['avg_return'] > 0 else '#b4452f'
             hist_badge = (
-                f'<span style="font-size:0.72rem; color:#888;">'
+                f'<span style="font-size:0.72rem; color:#7a6a52;">'
                 f'歷史 <b>{ss["trades"]}</b>筆 | '
                 f'勝率 <b style="color:{wr_color}">{ss["win_rate"]:.0f}%</b> | '
                 f'均報酬 <b style="color:{ar_color}">{ss["avg_return"]:+.1f}%</b>'
                 f'</span>'
             )
         else:
-            hist_badge = '<span style="font-size:0.72rem; color:#555;">歷史資料不足</span>'
+            hist_badge = '<span style="font-size:0.72rem; color:#9a8a6e;">歷史資料不足</span>'
 
         # 籌碼 + 新聞標注
         idata = inst_data.get(ticker, {})
@@ -488,7 +499,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         inst_change = idata.get('change', 0.0)
         inst_label = idata.get('label', '⚪ 無資料')
         news_label = ndata.get('label', '⚪ 中性')
-        inst_color = '#00ff00' if inst_change > 2 else '#ff4444' if inst_change < -2 else '#ffab00' if abs(inst_change) > 0.5 else '#888'
+        inst_color = '#2f7d4f' if inst_change > 2 else '#b4452f' if inst_change < -2 else '#fbbf24' if abs(inst_change) > 0.5 else '#7a6a52'
         inst_badge = (
             f'<td><span style="font-size:0.78rem;">{inst_label}'
             f'<br><span style="color:{inst_color}; font-weight:bold;">{inst_change:+.1f}%</span></span></td>'
@@ -503,17 +514,17 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
 
     # 顯示未被選入的候選（排名 > Top-K）
     for ticker, score, price in not_selected[:5]:
-        status = '<span style="color:#ffab00">🟡 候選 (超出 Top-K)</span>'
+        status = '<span style="color:#fbbf24">🟡 候選 (超出 Top-K)</span>'
         ss = stock_stats.get(ticker, None)
-        hist_badge = '<span style="font-size:0.72rem; color:#555;">-</span>'
+        hist_badge = '<span style="font-size:0.72rem; color:#9a8a6e;">-</span>'
         if ss and ss['trades'] >= 2:
-            wr_color = '#00ff00' if ss['win_rate'] >= 50 else '#ff4444'
-            hist_badge = f'<span style="font-size:0.72rem; color:#888;">勝率 <b style="color:{wr_color}">{ss["win_rate"]:.0f}%</b></span>'
+            wr_color = '#2f7d4f' if ss['win_rate'] >= 50 else '#b4452f'
+            hist_badge = f'<span style="font-size:0.72rem; color:#7a6a52;">勝率 <b style="color:{wr_color}">{ss["win_rate"]:.0f}%</b></span>'
 
         idata = inst_data.get(ticker, {})
         ndata = news_data.get(ticker, {})
         inst_change = idata.get('change', 0.0)
-        inst_color = '#00ff00' if inst_change > 2 else '#ff4444' if inst_change < -2 else '#888'
+        inst_color = '#2f7d4f' if inst_change > 2 else '#b4452f' if inst_change < -2 else '#7a6a52'
         inst_badge = (
             f'<td><span style="font-size:0.72rem;">{idata.get("label", "⚪")}'
             f'<br><span style="color:{inst_color}">{inst_change:+.1f}%</span></span></td>'
@@ -528,9 +539,9 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
 
     # 顯示被過濾掉的（前 5 筆）
     for ticker, score, price, reason in filtered_out[:5]:
-        status = f'<span style="color:#aaaaaa">⚪ 觀望 ({reason})</span>'
+        status = f'<span style="color:#9a8a6e">⚪ 觀望 ({reason})</span>'
         price_str = f'{price:.1f}' if not pd.isna(price) else '-'
-        inst_badge = '<td style="color:#555">-</td><td style="color:#555">-</td>'
+        inst_badge = '<td style="color:#9a8a6e">-</td><td style="color:#9a8a6e">-</td>'
         trading_plan_rows += (
             f'<tr style="opacity:0.4"><td>{ticker}</td><td>{_stock_names.get(ticker, "-")}</td><td>{score:.2f}</td>'
             f'<td>{price_str}</td><td>{status}</td><td>-</td>'
@@ -541,7 +552,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
     trade_history_rows = ""
     if not trades_df.empty:
         for _, row in trades_df.tail(20).iloc[::-1].iterrows():
-            color = "#00ff00" if row['Return_Pct'] > 0 else "#ff4444"
+            color = "#2f7d4f" if row['Return_Pct'] > 0 else "#b4452f"
             trade_history_rows += (
                 f'<tr>'
                 f'<td>{row["Ticker"]}</td>'
@@ -564,14 +575,14 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
             avg_ret = subset['Return_Pct'].mean() * 100
             reason_stats_rows += (
                 f'<tr><td>{reason}</td><td>{count} 筆</td>'
-                f'<td style="color:{"#00ff00" if avg_ret > 0 else "#ff4444"}">{avg_ret:+.2f}%</td></tr>\n'
+                f'<td style="color:{"#2f7d4f" if avg_ret > 0 else "#b4452f"}">{avg_ret:+.2f}%</td></tr>\n'
             )
 
     # === 風險指標卡片 ===
     m = metrics
-    total_ret_color = "#00ff00" if total_ret > 0 else "#ff4444"
-    sharpe_color = "#00ff00" if m['sharpe'] > 0.5 else ("#ffab00" if m['sharpe'] > 0 else "#ff4444")
-    dd_color = "#ff4444" if m['max_drawdown_pct'] < -0.15 else "#ffab00"
+    total_ret_color = "#2f7d4f" if total_ret > 0 else "#b4452f"
+    sharpe_color = "#2f7d4f" if m['sharpe'] > 0.5 else ("#fbbf24" if m['sharpe'] > 0 else "#b4452f")
+    dd_color = "#b4452f" if m['max_drawdown_pct'] < -0.15 else "#fbbf24"
 
     # === Benchmark 數值比較 ===
     benchmark_stats_html = ""
@@ -586,7 +597,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
             bm_mdd = bench_m['max_drawdown_pct'] * 100
             bm_sharpe = bench_m['sharpe']
             excess_ret = m['ann_return'] * 100 - bm_ann
-            excess_color = "#00ff00" if excess_ret > 0 else "#ff4444"
+            excess_color = "#2f7d4f" if excess_ret > 0 else "#b4452f"
             benchmark_stats_html = f"""
     <div class="stats">
         <div class="stat-card benchmark">
@@ -628,7 +639,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
                 s_ret = (float(strat_sub.iloc[-1]) / float(strat_sub.iloc[0]) - 1) * 100
                 b_ret = (float(bench2_sub.iloc[-1]) / float(bench2_sub.iloc[0]) - 1) * 100
                 excess2 = s_ret - b_ret
-                e2_color = "#00ff00" if excess2 > 0 else "#ff4444"
+                e2_color = "#2f7d4f" if excess2 > 0 else "#b4452f"
                 benchmark2_stats_html = f"""
     <div class="stats">
         <div class="stat-card benchmark">
@@ -663,12 +674,12 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
                 # 顏色映射：紅(-10%) → 黃(0%) → 綠(+10%)
                 if ret_pct >= 0:
                     intensity = min(ret_pct / 10, 1.0)
-                    bg = f"rgba(0,255,0,{intensity * 0.3:.2f})"
-                    color = "#00ff00"
+                    bg = f"rgba(47,125,79,{intensity * 0.3:.2f})"
+                    color = "#2f7d4f"
                 else:
                     intensity = min(abs(ret_pct) / 10, 1.0)
-                    bg = f"rgba(255,68,68,{intensity * 0.3:.2f})"
-                    color = "#ff4444"
+                    bg = f"rgba(180,69,47,{intensity * 0.3:.2f})"
+                    color = "#b4452f"
                 rows_html += (
                     f'<tr style="background:{bg}">'
                     f'<td>{dt.strftime("%Y-%m")}</td>'
@@ -701,10 +712,10 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
             mkt_ma60 = benchmark_equity.rolling(60).mean().iloc[-1] if len(benchmark_equity) >= 60 else None
             if mkt_ma60 is not None:
                 regime = "🟢 多頭" if mkt_latest > mkt_ma60 else "🔴 空頭"
-                regime_color = "#00ff00" if mkt_latest > mkt_ma60 else "#ff4444"
+                regime_color = "#2f7d4f" if mkt_latest > mkt_ma60 else "#b4452f"
             else:
                 regime = "⚪ 未知"
-                regime_color = "#888"
+                regime_color = "#7a6a52"
 
             # 波動率
             mkt_vol = benchmark_equity.pct_change().tail(20).std() * (252**0.5) * 100
@@ -717,15 +728,15 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         </div>
         <div class="stat-card benchmark">
             <div class="label">0050 近 5 日</div>
-            <div class="value" style="color:{'#00ff00' if ret_5d > 0 else '#ff4444'}">{ret_5d:+.1f}%</div>
+            <div class="value" style="color:{'#2f7d4f' if ret_5d > 0 else '#b4452f'}">{ret_5d:+.1f}%</div>
         </div>
         <div class="stat-card benchmark">
             <div class="label">0050 近 20 日</div>
-            <div class="value" style="color:{'#00ff00' if ret_20d > 0 else '#ff4444'}">{ret_20d:+.1f}%</div>
+            <div class="value" style="color:{'#2f7d4f' if ret_20d > 0 else '#b4452f'}">{ret_20d:+.1f}%</div>
         </div>
         <div class="stat-card benchmark">
             <div class="label">0050 近 60 日</div>
-            <div class="value" style="color:{'#00ff00' if ret_60d > 0 else '#ff4444'}">{ret_60d:+.1f}%</div>
+            <div class="value" style="color:{'#2f7d4f' if ret_60d > 0 else '#b4452f'}">{ret_60d:+.1f}%</div>
         </div>
         <div class="stat-card risk">
             <div class="label">市場波動率 (20D)</div>
@@ -767,11 +778,11 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
                 f'<tr><td>#{i+1}</td>'
                 f'<td>{s.strftime("%Y-%m-%d")}</td>'
                 f'<td>{e.strftime("%Y-%m-%d")}</td>'
-                f'<td style="color:#ff4444; font-weight:bold">{depth:.1f}%</td>'
+                f'<td style="color:#b4452f; font-weight:bold">{depth:.1f}%</td>'
                 f'<td>{duration} 天</td></tr>\n'
             )
 
-        dd_color2 = "#00ff00" if current_dd > -5 else ("#ffab00" if current_dd > -10 else "#ff4444")
+        dd_color2 = "#2f7d4f" if current_dd > -5 else ("#fbbf24" if current_dd > -10 else "#b4452f")
         drawdown_analysis_html = f"""
     <div class="stats">
         <div class="stat-card risk">
@@ -809,7 +820,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
             min_sharpe = roll_sharpe.min()
             max_sharpe = roll_sharpe.max()
 
-            rs_color = "#00ff00" if recent_sharpe > 2 else ("#ffab00" if recent_sharpe > 1 else "#ff4444")
+            rs_color = "#2f7d4f" if recent_sharpe > 2 else ("#fbbf24" if recent_sharpe > 1 else "#b4452f")
             rolling_perf_html = f"""
     <div class="stats">
         <div class="stat-card" style="border-left-color:{rs_color}">
@@ -860,11 +871,11 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
     <div class="stats">
         <div class="stat-card">
             <div class="label">最長連勝</div>
-            <div class="value" style="color:#00ff00">{max_win_streak} 筆</div>
+            <div class="value" style="color:#2f7d4f">{max_win_streak} 筆</div>
         </div>
         <div class="stat-card risk">
             <div class="label">最長連敗</div>
-            <div class="value" style="color:#ff4444">{max_loss_streak} 筆</div>
+            <div class="value" style="color:#b4452f">{max_loss_streak} 筆</div>
         </div>
         <div class="stat-card">
             <div class="label">近 5 筆走勢</div>
@@ -882,8 +893,8 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
             # Top 10 + Bottom 5
             top_rows = ""
             for ticker, ss in sorted_stocks[:10]:
-                ret_color = "#00ff00" if ss['total_return'] > 0 else "#ff4444"
-                wr_color = "#00ff00" if ss['win_rate'] >= 50 else "#ff4444"
+                ret_color = "#2f7d4f" if ss['total_return'] > 0 else "#b4452f"
+                wr_color = "#2f7d4f" if ss['win_rate'] >= 50 else "#b4452f"
                 top_rows += (
                     f'<tr>'
                     f'<td><b>{ticker}</b></td>'
@@ -895,8 +906,8 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
                 )
             bottom_rows = ""
             for ticker, ss in sorted_stocks[-5:]:
-                ret_color = "#00ff00" if ss['total_return'] > 0 else "#ff4444"
-                wr_color = "#00ff00" if ss['win_rate'] >= 50 else "#ff4444"
+                ret_color = "#2f7d4f" if ss['total_return'] > 0 else "#b4452f"
+                wr_color = "#2f7d4f" if ss['win_rate'] >= 50 else "#b4452f"
                 bottom_rows += (
                     f'<tr style="opacity:0.7">'
                     f'<td><b>{ticker}</b></td>'
@@ -908,12 +919,12 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
                 )
 
             stock_leaderboard_html = f"""
-    <h3 style="color:#00e5ff; margin-top:16px">🏆 Top 10 貢獻股</h3>
+    <h3 style="color:#9c6b3f; margin-top:16px">🏆 Top 10 貢獻股</h3>
     <table>
         <thead><tr><th>股票</th><th>交易數</th><th>勝率</th><th>平均報酬</th><th>總貢獻</th></tr></thead>
         <tbody>{top_rows}</tbody>
     </table>
-    <h3 style="color:#ff4444; margin-top:16px">📉 Bottom 5 虧損股</h3>
+    <h3 style="color:#b4452f; margin-top:16px">📉 Bottom 5 虧損股</h3>
     <table>
         <thead><tr><th>股票</th><th>交易數</th><th>勝率</th><th>平均報酬</th><th>總貢獻</th></tr></thead>
         <tbody>{bottom_rows}</tbody>
@@ -936,7 +947,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
                 cnt = len(rets[(rets >= lo) & (rets < hi)])
                 pct = cnt / len(rets) * 100
                 bar_width = min(pct * 3, 100)
-                color = "#ff4444" if lo < 0 else "#00ff00"
+                color = "#b4452f" if lo < 0 else "#2f7d4f"
                 dist_rows += (
                     f'<tr>'
                     f'<td>{label}</td>'
@@ -971,114 +982,202 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
     <title>AI 台股量化交易 v8.5 — {report_date}</title>
     <meta name="description" content="AI 驅動的台股量化交易系統 v8.5，完整風險報告、Benchmark 對比、OCO 智慧掛單建議">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        :root {{
+            --bg: #f0e4cc;
+            --surface: #faf4e6;
+            --surface-2: #f3e8d0;
+            --surface-hover: #f6edd8;
+            --border: rgba(120,88,46,0.18);
+            --border-strong: rgba(120,88,46,0.34);
+            --text: #3a2c1d;
+            --text-dim: #7a6a52;
+            --text-faint: #9a8a6e;
+            --accent: #9c6b3f;
+            --accent-2: #5f3c20;
+            --gain: #2f7d4f;
+            --loss: #b4452f;
+            --warn: #b5852a;
+            --radius: 16px;
+            --shadow: 0 1px 2px rgba(80,52,24,0.10), 0 12px 30px rgba(80,52,24,0.13);
+        }}
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        html {{ -webkit-text-size-adjust: 100%; }}
         body {{
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: #0a0a0f;
-            color: #e0e0e0;
-            padding: 24px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+            background:
+                repeating-linear-gradient(91deg, rgba(120,82,40,0.022) 0 1px, transparent 1px 9px),
+                radial-gradient(1100px 520px at 50% -8%, rgba(156,107,63,0.16), transparent 60%),
+                linear-gradient(165deg, #f4ead7 0%, #e7d6b6 100%);
+            background-attachment: fixed;
+            color: var(--text);
+            padding: 28px 20px 64px;
             line-height: 1.6;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum" 1;
+            -webkit-font-smoothing: antialiased;
         }}
         .container {{ max-width: 1200px; margin: 0 auto; }}
+        a {{ color: var(--accent); text-decoration: none; }}
+        a:hover {{ text-decoration: underline; }}
         h1 {{
-            font-size: 1.8rem;
-            color: #00e5ff;
-            border-bottom: 2px solid #1a1a2e;
-            padding-bottom: 12px;
-            margin-bottom: 8px;
+            font-size: clamp(1.55rem, 4vw, 2.1rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(95deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
         }}
         h2 {{
-            font-size: 1.3rem;
-            color: #00e5ff;
-            margin-top: 32px;
-            margin-bottom: 12px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #1a1a2e;
+            font-size: clamp(1.1rem, 2.6vw, 1.35rem);
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 46px;
+            margin-bottom: 14px;
+            padding-left: 14px;
+            position: relative;
         }}
+        h2::before {{
+            content: "";
+            position: absolute;
+            left: 0; top: 0.16em; bottom: 0.16em;
+            width: 4px; border-radius: 4px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+        }}
+        h3 {{ font-size: 1rem; font-weight: 600; }}
         .subtitle {{
-            color: #888;
+            color: var(--text-dim);
             font-size: 0.9rem;
-            margin-bottom: 24px;
+            margin-bottom: 8px;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
         }}
         .stats {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+            gap: 12px;
             margin-bottom: 28px;
         }}
         .stat-card {{
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            border-left: 4px solid #00e5ff;
+            background: linear-gradient(160deg, var(--surface), var(--surface-2));
+            padding: 16px 18px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
         }}
-        .stat-card.risk {{ border-left-color: #ab47bc; }}
-        .stat-card.benchmark {{ border-left-color: #ffab00; }}
+        .stat-card::before {{
+            content: "";
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: var(--accent);
+        }}
+        .stat-card:hover {{
+            transform: translateY(-2px);
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow);
+        }}
+        .stat-card.risk::before {{ background: var(--accent-2); }}
+        .stat-card.benchmark::before {{ background: var(--warn); }}
         .stat-card .value {{
             font-size: 1.5rem;
             font-weight: 700;
-            margin: 4px 0;
+            margin: 3px 0;
+            letter-spacing: -0.01em;
         }}
         .stat-card .label {{
-            font-size: 0.75rem;
-            color: #888;
+            font-size: 0.72rem;
+            color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            font-weight: 600;
         }}
         table {{
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-            background: #1a1a2e;
-            border-radius: 8px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
-        }}
-        th, td {{
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid #252540;
             font-size: 0.85rem;
         }}
-        th {{
-            background: #16213e;
-            color: #00e5ff;
-            font-weight: 600;
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+        th, td {{
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
         }}
-        tr:hover {{ background: #16213e; }}
+        th {{
+            background: var(--surface-2);
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }}
+        tbody tr {{ transition: background .12s ease; }}
+        tbody tr:nth-child(even) {{ background: rgba(120,88,46,0.05); }}
+        tbody tr:last-child td {{ border-bottom: none; }}
+        tbody tr:hover {{ background: var(--surface-hover); }}
+        td b {{ color: var(--text); font-weight: 600; }}
         img {{
             max-width: 100%;
+            border-radius: var(--radius);
+            margin-top: 14px;
+            border: 1px solid var(--border);
+        }}
+        .split-grid {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }}
+        .warn-box {{
+            display: flex; gap: 10px; align-items: flex-start;
+            background: rgba(181,133,42,0.14);
+            border: 1px solid rgba(181,133,42,0.40);
+            border-left: 4px solid var(--warn);
+            color: #7a531a;
+            padding: 12px 14px;
             border-radius: 10px;
-            margin-top: 12px;
-            border: 1px solid #252540;
+            font-size: 0.82rem;
+            margin: 14px 0 8px;
         }}
         .disclaimer {{
-            margin-top: 40px;
-            padding: 16px;
-            background: #1a1a0e;
-            border-left: 4px solid #ffab00;
-            border-radius: 8px;
+            margin-top: 48px;
+            padding: 18px;
+            background: rgba(181,133,42,0.10);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--warn);
+            border-radius: 12px;
             font-size: 0.82rem;
-            color: #999;
+            color: var(--text-dim);
         }}
         .config-badge {{
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 6px;
+            display: inline-flex; align-items: center;
+            padding: 4px 11px;
+            border-radius: 999px;
             font-size: 0.72rem;
             font-weight: 600;
-            background: #16213e;
-            color: #00e5ff;
+            background: rgba(156,107,63,0.12);
+            border: 1px solid rgba(156,107,63,0.32);
+            color: #6e4a2a;
             margin: 2px;
         }}
         .section-note {{
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 8px;
+            font-size: 0.82rem;
+            color: var(--text-faint);
+            margin-bottom: 10px;
+        }}
+        @media (max-width: 720px) {{
+            body {{ padding: 18px 12px 48px; }}
+            h2 {{ margin-top: 34px; }}
+            .split-grid {{ grid-template-columns: 1fr; gap: 30px; }}
+            table {{ display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }}
+            .stat-card .value {{ font-size: 1.35rem; }}
         }}
     </style>
 </head>
@@ -1094,8 +1193,8 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         <span class="config-badge">💰 成本: {cost_desc}</span>
     </p>
 
-    <div style="background:#fff3cd;border:1px solid #ffc107;padding:10px;margin:10px 0;border-radius:4px;font-size:13px;">
-    ⚠️ <strong>存活者偏差警告:</strong> 股票池使用當前上市股票回測歷史期間。實際績效可能低於回測 2-5% (年化)。可提供 delisted_tickers.csv 減輕此偏差。
+    <div class="warn-box">
+    <span>⚠️</span><span><strong>存活者偏差警告：</strong>股票池使用當前上市股票回測歷史期間。實際績效可能低於回測 2-5% (年化)。可提供 delisted_tickers.csv 減輕此偏差。</span>
     </div>
 
     <h2>📊 績效總覽</h2>
@@ -1134,7 +1233,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         </div>
         <div class="stat-card">
             <div class="label">勝率</div>
-            <div class="value" style="color:#00ff00;">{m['win_rate']*100:.1f}%</div>
+            <div class="value" style="color:#2f7d4f;">{m['win_rate']*100:.1f}%</div>
         </div>
         <div class="stat-card">
             <div class="label">Profit Factor</div>

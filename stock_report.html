@@ -6,114 +6,202 @@
     <title>AI 台股量化交易 v8.5 — 2026-06-18</title>
     <meta name="description" content="AI 驅動的台股量化交易系統 v8.5，完整風險報告、Benchmark 對比、OCO 智慧掛單建議">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        :root {
+            --bg: #f0e4cc;
+            --surface: #faf4e6;
+            --surface-2: #f3e8d0;
+            --surface-hover: #f6edd8;
+            --border: rgba(120,88,46,0.18);
+            --border-strong: rgba(120,88,46,0.34);
+            --text: #3a2c1d;
+            --text-dim: #7a6a52;
+            --text-faint: #9a8a6e;
+            --accent: #9c6b3f;
+            --accent-2: #5f3c20;
+            --gain: #2f7d4f;
+            --loss: #b4452f;
+            --warn: #b5852a;
+            --radius: 16px;
+            --shadow: 0 1px 2px rgba(80,52,24,0.10), 0 12px 30px rgba(80,52,24,0.13);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: #0a0a0f;
-            color: #e0e0e0;
-            padding: 24px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+            background:
+                repeating-linear-gradient(91deg, rgba(120,82,40,0.022) 0 1px, transparent 1px 9px),
+                radial-gradient(1100px 520px at 50% -8%, rgba(156,107,63,0.16), transparent 60%),
+                linear-gradient(165deg, #f4ead7 0%, #e7d6b6 100%);
+            background-attachment: fixed;
+            color: var(--text);
+            padding: 28px 20px 64px;
             line-height: 1.6;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum" 1;
+            -webkit-font-smoothing: antialiased;
         }
         .container { max-width: 1200px; margin: 0 auto; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
         h1 {
-            font-size: 1.8rem;
-            color: #00e5ff;
-            border-bottom: 2px solid #1a1a2e;
-            padding-bottom: 12px;
-            margin-bottom: 8px;
+            font-size: clamp(1.55rem, 4vw, 2.1rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(95deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
         }
         h2 {
-            font-size: 1.3rem;
-            color: #00e5ff;
-            margin-top: 32px;
-            margin-bottom: 12px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #1a1a2e;
+            font-size: clamp(1.1rem, 2.6vw, 1.35rem);
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 46px;
+            margin-bottom: 14px;
+            padding-left: 14px;
+            position: relative;
         }
+        h2::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0.16em; bottom: 0.16em;
+            width: 4px; border-radius: 4px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+        }
+        h3 { font-size: 1rem; font-weight: 600; }
         .subtitle {
-            color: #888;
+            color: var(--text-dim);
             font-size: 0.9rem;
-            margin-bottom: 24px;
+            margin-bottom: 8px;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
         }
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+            gap: 12px;
             margin-bottom: 28px;
         }
         .stat-card {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            border-left: 4px solid #00e5ff;
+            background: linear-gradient(160deg, var(--surface), var(--surface-2));
+            padding: 16px 18px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
         }
-        .stat-card.risk { border-left-color: #ab47bc; }
-        .stat-card.benchmark { border-left-color: #ffab00; }
+        .stat-card::before {
+            content: "";
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; background: var(--accent);
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow);
+        }
+        .stat-card.risk::before { background: var(--accent-2); }
+        .stat-card.benchmark::before { background: var(--warn); }
         .stat-card .value {
             font-size: 1.5rem;
             font-weight: 700;
-            margin: 4px 0;
+            margin: 3px 0;
+            letter-spacing: -0.01em;
         }
         .stat-card .label {
-            font-size: 0.75rem;
-            color: #888;
+            font-size: 0.72rem;
+            color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            font-weight: 600;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-            background: #1a1a2e;
-            border-radius: 8px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
-        }
-        th, td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid #252540;
             font-size: 0.85rem;
         }
-        th {
-            background: #16213e;
-            color: #00e5ff;
-            font-weight: 600;
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+        th, td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
         }
-        tr:hover { background: #16213e; }
+        th {
+            background: var(--surface-2);
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        tbody tr { transition: background .12s ease; }
+        tbody tr:nth-child(even) { background: rgba(120,88,46,0.05); }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: var(--surface-hover); }
+        td b { color: var(--text); font-weight: 600; }
         img {
             max-width: 100%;
+            border-radius: var(--radius);
+            margin-top: 14px;
+            border: 1px solid var(--border);
+        }
+        .split-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .warn-box {
+            display: flex; gap: 10px; align-items: flex-start;
+            background: rgba(181,133,42,0.14);
+            border: 1px solid rgba(181,133,42,0.40);
+            border-left: 4px solid var(--warn);
+            color: #7a531a;
+            padding: 12px 14px;
             border-radius: 10px;
-            margin-top: 12px;
-            border: 1px solid #252540;
+            font-size: 0.82rem;
+            margin: 14px 0 8px;
         }
         .disclaimer {
-            margin-top: 40px;
-            padding: 16px;
-            background: #1a1a0e;
-            border-left: 4px solid #ffab00;
-            border-radius: 8px;
+            margin-top: 48px;
+            padding: 18px;
+            background: rgba(181,133,42,0.10);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--warn);
+            border-radius: 12px;
             font-size: 0.82rem;
-            color: #999;
+            color: var(--text-dim);
         }
         .config-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 6px;
+            display: inline-flex; align-items: center;
+            padding: 4px 11px;
+            border-radius: 999px;
             font-size: 0.72rem;
             font-weight: 600;
-            background: #16213e;
-            color: #00e5ff;
+            background: rgba(156,107,63,0.12);
+            border: 1px solid rgba(156,107,63,0.32);
+            color: #6e4a2a;
             margin: 2px;
         }
         .section-note {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 8px;
+            font-size: 0.82rem;
+            color: var(--text-faint);
+            margin-bottom: 10px;
+        }
+        @media (max-width: 720px) {
+            body { padding: 18px 12px 48px; }
+            h2 { margin-top: 34px; }
+            .split-grid { grid-template-columns: 1fr; gap: 30px; }
+            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .stat-card .value { font-size: 1.35rem; }
         }
     </style>
 </head>
@@ -129,19 +217,19 @@
         <span class="config-badge">💰 成本: 買 0.143% + 賣 0.443%</span>
     </p>
 
-    <div style="background:#fff3cd;border:1px solid #ffc107;padding:10px;margin:10px 0;border-radius:4px;font-size:13px;">
-    ⚠️ <strong>存活者偏差警告:</strong> 股票池使用當前上市股票回測歷史期間。實際績效可能低於回測 2-5% (年化)。可提供 delisted_tickers.csv 減輕此偏差。
+    <div class="warn-box">
+    <span>⚠️</span><span><strong>存活者偏差警告：</strong>股票池使用當前上市股票回測歷史期間。實際績效可能低於回測 2-5% (年化)。可提供 delisted_tickers.csv 減輕此偏差。</span>
     </div>
 
     <h2>📊 績效總覽</h2>
     <div class="stats">
         <div class="stat-card">
             <div class="label">策略總報酬率</div>
-            <div class="value" style="color:#00ff00;">+35.8%</div>
+            <div class="value" style="color:#2f7d4f;">+35.8%</div>
         </div>
         <div class="stat-card">
             <div class="label">年化報酬率</div>
-            <div class="value" style="color:#00ff00;">+11.0%</div>
+            <div class="value" style="color:#2f7d4f;">+11.0%</div>
         </div>
         <div class="stat-card">
             <div class="label">年化波動率</div>
@@ -149,7 +237,7 @@
         </div>
         <div class="stat-card risk">
             <div class="label">Sharpe Ratio</div>
-            <div class="value" style="color:#ffab00;">0.39</div>
+            <div class="value" style="color:#fbbf24;">0.39</div>
         </div>
         <div class="stat-card risk">
             <div class="label">Sortino Ratio</div>
@@ -157,7 +245,7 @@
         </div>
         <div class="stat-card risk">
             <div class="label">最大回撤</div>
-            <div class="value" style="color:#ff4444;">-42.4%</div>
+            <div class="value" style="color:#b4452f;">-42.4%</div>
         </div>
         <div class="stat-card risk">
             <div class="label">Calmar Ratio</div>
@@ -169,7 +257,7 @@
         </div>
         <div class="stat-card">
             <div class="label">勝率</div>
-            <div class="value" style="color:#00ff00;">42.5%</div>
+            <div class="value" style="color:#2f7d4f;">42.5%</div>
         </div>
         <div class="stat-card">
             <div class="label">Profit Factor</div>
@@ -205,23 +293,23 @@
             </tr>
         </thead>
         <tbody>
-<tr><td>2344</td><td>華邦電</td><td>3.97</td><td>218.5</td><td><span style="color:#00ff00; font-weight:bold;">🟢 建議買進 #1</span></td><td><b>停利:</b> <span style="color:#00ff00">276.0</span> (+26.3%) <br><b>停損:</b> <span style="color:#ff4444">182.6</span> (-16.4%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#888;">歷史 <b>16</b>筆 | 勝率 <b style="color:#00ff00">50%</b> | 均報酬 <b style="color:#00ff00">+4.9%</b></span></td><td><span style="font-size:0.78rem;">🟢 大買<br><span style="color:#00ff00; font-weight:bold;">+4.9%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
-<tr><td>2327</td><td>國巨*</td><td>3.95</td><td>1080.0</td><td><span style="color:#00ff00; font-weight:bold;">🟢 建議買進 #2</span></td><td><b>停利:</b> <span style="color:#00ff00">1379.2</span> (+27.7%) <br><b>停損:</b> <span style="color:#ff4444">893.0</span> (-17.3%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#888;">歷史 <b>12</b>筆 | 勝率 <b style="color:#00ff00">58%</b> | 均報酬 <b style="color:#00ff00">+6.0%</b></span></td><td><span style="font-size:0.78rem;">🟠 小賣<br><span style="color:#ffab00; font-weight:bold;">-1.1%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
-<tr><td>6116</td><td>彩晶</td><td>3.85</td><td>18.8</td><td><span style="color:#00ff00; font-weight:bold;">🟢 建議買進 #3</span></td><td><b>停利:</b> <span style="color:#00ff00">25.0</span> (+33.1%) <br><b>停損:</b> <span style="color:#ff4444">14.9</span> (-20.7%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#888;">歷史 <b>3</b>筆 | 勝率 <b style="color:#ff4444">33%</b> | 均報酬 <b style="color:#00ff00">+1.6%</b></span></td><td><span style="font-size:0.78rem;">⚪ 無資料<br><span style="color:#888; font-weight:bold;">+0.0%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
-<tr><td>3481</td><td>群創</td><td>3.83</td><td>64.4</td><td><span style="color:#00ff00; font-weight:bold;">🟢 建議買進 #4</span></td><td><b>停利:</b> <span style="color:#00ff00">84.0</span> (+30.5%) <br><b>停損:</b> <span style="color:#ff4444">52.1</span> (-19.1%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#888;">歷史 <b>17</b>筆 | 勝率 <b style="color:#ff4444">47%</b> | 均報酬 <b style="color:#ff4444">-0.1%</b></span></td><td><span style="font-size:0.78rem;">🔴 大賣<br><span style="color:#ff4444; font-weight:bold;">-2.5%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
-<tr><td>1303</td><td>南亞</td><td>3.72</td><td>139.0</td><td><span style="color:#00ff00; font-weight:bold;">🟢 建議買進 #5</span></td><td><b>停利:</b> <span style="color:#00ff00">171.4</span> (+23.3%) <br><b>停損:</b> <span style="color:#ff4444">118.8</span> (-14.6%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#888;">歷史 <b>10</b>筆 | 勝率 <b style="color:#ff4444">40%</b> | 均報酬 <b style="color:#00ff00">+0.1%</b></span></td><td><span style="font-size:0.78rem;">🟢 大買<br><span style="color:#00ff00; font-weight:bold;">+2.9%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
-<tr><td>2408</td><td>南亞科</td><td>3.68</td><td>459.5</td><td><span style="color:#00ff00; font-weight:bold;">🟢 建議買進 #6</span></td><td><b>停利:</b> <span style="color:#00ff00">579.6</span> (+26.1%) <br><b>停損:</b> <span style="color:#ff4444">384.4</span> (-16.3%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#888;">歷史 <b>23</b>筆 | 勝率 <b style="color:#00ff00">61%</b> | 均報酬 <b style="color:#00ff00">+4.1%</b></span></td><td><span style="font-size:0.78rem;">🟢 大買<br><span style="color:#00ff00; font-weight:bold;">+4.7%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
-<tr><td>2882</td><td>國泰金</td><td>3.52</td><td>115.5</td><td><span style="color:#00ff00; font-weight:bold;">🟢 建議買進 #7</span></td><td><b>停利:</b> <span style="color:#00ff00">133.2</span> (+15.4%) <br><b>停損:</b> <span style="color:#ff4444">104.4</span> (-9.6%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#888;">歷史 <b>8</b>筆 | 勝率 <b style="color:#ff4444">25%</b> | 均報酬 <b style="color:#ff4444">-2.3%</b></span></td><td><span style="font-size:0.78rem;">⚪ 無資料<br><span style="color:#888; font-weight:bold;">+0.0%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
-<tr style="opacity:0.6"><td>2379</td><td>瑞昱</td><td>3.43</td><td>819.0</td><td><span style="color:#ffab00">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#888;">勝率 <b style="color:#ff4444">25%</b></span></td><td><span style="font-size:0.72rem;">🟢 大買<br><span style="color:#00ff00">+2.3%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
-<tr style="opacity:0.6"><td>2883</td><td>凱基金</td><td>3.42</td><td>30.8</td><td><span style="color:#ffab00">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#888;">勝率 <b style="color:#ff4444">0%</b></span></td><td><span style="font-size:0.72rem;">🟠 小賣<br><span style="color:#888">-1.6%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
-<tr style="opacity:0.6"><td>2881</td><td>富邦金</td><td>3.38</td><td>138.0</td><td><span style="color:#ffab00">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#888;">勝率 <b style="color:#00ff00">50%</b></span></td><td><span style="font-size:0.72rem;">⚪ 無資料<br><span style="color:#888">+0.0%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
-<tr style="opacity:0.6"><td>6239</td><td>力成</td><td>3.33</td><td>363.5</td><td><span style="color:#ffab00">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#888;">勝率 <b style="color:#ff4444">44%</b></span></td><td><span style="font-size:0.72rem;">🔴 大賣<br><span style="color:#ff4444">-4.0%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
-<tr style="opacity:0.6"><td>2303</td><td>聯電</td><td>3.20</td><td>145.5</td><td><span style="color:#ffab00">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#888;">勝率 <b style="color:#00ff00">50%</b></span></td><td><span style="font-size:0.72rem;">🔴 大賣<br><span style="color:#ff4444">-2.6%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
-<tr style="opacity:0.4"><td>3231</td><td>緯創</td><td>1.98</td><td>161.5</td><td><span style="color:#aaaaaa">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#555">-</td><td style="color:#555">-</td></tr>
-<tr style="opacity:0.4"><td>1605</td><td>華新</td><td>1.85</td><td>39.0</td><td><span style="color:#aaaaaa">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#555">-</td><td style="color:#555">-</td></tr>
-<tr style="opacity:0.4"><td>2884</td><td>玉山金</td><td>1.73</td><td>35.4</td><td><span style="color:#aaaaaa">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#555">-</td><td style="color:#555">-</td></tr>
-<tr style="opacity:0.4"><td>2376</td><td>技嘉</td><td>1.67</td><td>344.0</td><td><span style="color:#aaaaaa">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#555">-</td><td style="color:#555">-</td></tr>
-<tr style="opacity:0.4"><td>3037</td><td>欣興</td><td>1.65</td><td>968.0</td><td><span style="color:#aaaaaa">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#555">-</td><td style="color:#555">-</td></tr>
+<tr><td>2344</td><td>華邦電</td><td>3.97</td><td>218.5</td><td><span style="color:#2f7d4f; font-weight:bold;">🟢 建議買進 #1</span></td><td><b>停利:</b> <span style="color:#2f7d4f">276.0</span> (+26.3%) <br><b>停損:</b> <span style="color:#b4452f">182.6</span> (-16.4%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#7a6a52;">歷史 <b>16</b>筆 | 勝率 <b style="color:#2f7d4f">50%</b> | 均報酬 <b style="color:#2f7d4f">+4.9%</b></span></td><td><span style="font-size:0.78rem;">🟢 大買<br><span style="color:#2f7d4f; font-weight:bold;">+4.9%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
+<tr><td>2327</td><td>國巨*</td><td>3.95</td><td>1080.0</td><td><span style="color:#2f7d4f; font-weight:bold;">🟢 建議買進 #2</span></td><td><b>停利:</b> <span style="color:#2f7d4f">1379.2</span> (+27.7%) <br><b>停損:</b> <span style="color:#b4452f">893.0</span> (-17.3%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#7a6a52;">歷史 <b>12</b>筆 | 勝率 <b style="color:#2f7d4f">58%</b> | 均報酬 <b style="color:#2f7d4f">+6.0%</b></span></td><td><span style="font-size:0.78rem;">🟠 小賣<br><span style="color:#fbbf24; font-weight:bold;">-1.1%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
+<tr><td>6116</td><td>彩晶</td><td>3.85</td><td>18.8</td><td><span style="color:#2f7d4f; font-weight:bold;">🟢 建議買進 #3</span></td><td><b>停利:</b> <span style="color:#2f7d4f">25.0</span> (+33.1%) <br><b>停損:</b> <span style="color:#b4452f">14.9</span> (-20.7%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#7a6a52;">歷史 <b>3</b>筆 | 勝率 <b style="color:#b4452f">33%</b> | 均報酬 <b style="color:#2f7d4f">+1.6%</b></span></td><td><span style="font-size:0.78rem;">⚪ 無資料<br><span style="color:#7a6a52; font-weight:bold;">+0.0%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
+<tr><td>3481</td><td>群創</td><td>3.83</td><td>64.4</td><td><span style="color:#2f7d4f; font-weight:bold;">🟢 建議買進 #4</span></td><td><b>停利:</b> <span style="color:#2f7d4f">84.0</span> (+30.5%) <br><b>停損:</b> <span style="color:#b4452f">52.1</span> (-19.1%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#7a6a52;">歷史 <b>17</b>筆 | 勝率 <b style="color:#b4452f">47%</b> | 均報酬 <b style="color:#b4452f">-0.1%</b></span></td><td><span style="font-size:0.78rem;">🔴 大賣<br><span style="color:#b4452f; font-weight:bold;">-2.5%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
+<tr><td>1303</td><td>南亞</td><td>3.72</td><td>139.0</td><td><span style="color:#2f7d4f; font-weight:bold;">🟢 建議買進 #5</span></td><td><b>停利:</b> <span style="color:#2f7d4f">171.4</span> (+23.3%) <br><b>停損:</b> <span style="color:#b4452f">118.8</span> (-14.6%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#7a6a52;">歷史 <b>10</b>筆 | 勝率 <b style="color:#b4452f">40%</b> | 均報酬 <b style="color:#2f7d4f">+0.1%</b></span></td><td><span style="font-size:0.78rem;">🟢 大買<br><span style="color:#2f7d4f; font-weight:bold;">+2.9%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
+<tr><td>2408</td><td>南亞科</td><td>3.68</td><td>459.5</td><td><span style="color:#2f7d4f; font-weight:bold;">🟢 建議買進 #6</span></td><td><b>停利:</b> <span style="color:#2f7d4f">579.6</span> (+26.1%) <br><b>停損:</b> <span style="color:#b4452f">384.4</span> (-16.3%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#7a6a52;">歷史 <b>23</b>筆 | 勝率 <b style="color:#2f7d4f">61%</b> | 均報酬 <b style="color:#2f7d4f">+4.1%</b></span></td><td><span style="font-size:0.78rem;">🟢 大買<br><span style="color:#2f7d4f; font-weight:bold;">+4.7%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
+<tr><td>2882</td><td>國泰金</td><td>3.52</td><td>115.5</td><td><span style="color:#2f7d4f; font-weight:bold;">🟢 建議買進 #7</span></td><td><b>停利:</b> <span style="color:#2f7d4f">133.2</span> (+15.4%) <br><b>停損:</b> <span style="color:#b4452f">104.4</span> (-9.6%) <br><b>最晚出場:</b> 2026-07-10</td><td><span style="font-size:0.72rem; color:#7a6a52;">歷史 <b>8</b>筆 | 勝率 <b style="color:#b4452f">25%</b> | 均報酬 <b style="color:#b4452f">-2.3%</b></span></td><td><span style="font-size:0.78rem;">⚪ 無資料<br><span style="color:#7a6a52; font-weight:bold;">+0.0%</span></span></td><td><span style="font-size:0.78rem;">⚪ 中性</span></td></tr>
+<tr style="opacity:0.6"><td>2379</td><td>瑞昱</td><td>3.43</td><td>819.0</td><td><span style="color:#fbbf24">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#7a6a52;">勝率 <b style="color:#b4452f">25%</b></span></td><td><span style="font-size:0.72rem;">🟢 大買<br><span style="color:#2f7d4f">+2.3%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
+<tr style="opacity:0.6"><td>2883</td><td>凱基金</td><td>3.42</td><td>30.8</td><td><span style="color:#fbbf24">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#7a6a52;">勝率 <b style="color:#b4452f">0%</b></span></td><td><span style="font-size:0.72rem;">🟠 小賣<br><span style="color:#7a6a52">-1.6%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
+<tr style="opacity:0.6"><td>2881</td><td>富邦金</td><td>3.38</td><td>138.0</td><td><span style="color:#fbbf24">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#7a6a52;">勝率 <b style="color:#2f7d4f">50%</b></span></td><td><span style="font-size:0.72rem;">⚪ 無資料<br><span style="color:#7a6a52">+0.0%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
+<tr style="opacity:0.6"><td>6239</td><td>力成</td><td>3.33</td><td>363.5</td><td><span style="color:#fbbf24">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#7a6a52;">勝率 <b style="color:#b4452f">44%</b></span></td><td><span style="font-size:0.72rem;">🔴 大賣<br><span style="color:#b4452f">-4.0%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
+<tr style="opacity:0.6"><td>2303</td><td>聯電</td><td>3.20</td><td>145.5</td><td><span style="color:#fbbf24">🟡 候選 (超出 Top-K)</span></td><td>-</td><td><span style="font-size:0.72rem; color:#7a6a52;">勝率 <b style="color:#2f7d4f">50%</b></span></td><td><span style="font-size:0.72rem;">🔴 大賣<br><span style="color:#b4452f">-2.6%</span></span></td><td><span style="font-size:0.72rem;">⚪ 中性</span></td></tr>
+<tr style="opacity:0.4"><td>3231</td><td>緯創</td><td>1.98</td><td>161.5</td><td><span style="color:#9a8a6e">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#9a8a6e">-</td><td style="color:#9a8a6e">-</td></tr>
+<tr style="opacity:0.4"><td>1605</td><td>華新</td><td>1.85</td><td>39.0</td><td><span style="color:#9a8a6e">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#9a8a6e">-</td><td style="color:#9a8a6e">-</td></tr>
+<tr style="opacity:0.4"><td>2884</td><td>玉山金</td><td>1.73</td><td>35.4</td><td><span style="color:#9a8a6e">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#9a8a6e">-</td><td style="color:#9a8a6e">-</td></tr>
+<tr style="opacity:0.4"><td>2376</td><td>技嘉</td><td>1.67</td><td>344.0</td><td><span style="color:#9a8a6e">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#9a8a6e">-</td><td style="color:#9a8a6e">-</td></tr>
+<tr style="opacity:0.4"><td>3037</td><td>欣興</td><td>1.65</td><td>968.0</td><td><span style="color:#9a8a6e">⚪ 觀望 (評分不足)</span></td><td>-</td><td>-</td><td style="color:#9a8a6e">-</td><td style="color:#9a8a6e">-</td></tr>
 
         </tbody>
     </table>
@@ -229,11 +317,11 @@
 
     <h2>🏛️ 三大法人籌碼動態</h2>
     <p class="section-note">
-        近 20 日三大法人（外資+投信+自營商）持股比重變化排名。Data: <a href="https://github.com/voidful/tw-institutional-stocker" style="color:#4FC3F7;">tw-institutional-stocker</a>
+        近 20 日三大法人（外資+投信+自營商）持股比重變化排名。Data: <a href="https://github.com/voidful/tw-institutional-stocker" style="color:#9c6b3f;">tw-institutional-stocker</a>
     </p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div class="split-grid">
         <div>
-            <h3 style="color:#00ff00;margin-bottom:8px;">🟢 法人買超 Top-15（20日）</h3>
+            <h3 style="color:#2f7d4f;margin-bottom:8px;">🟢 法人買超 Top-15（20日）</h3>
             <table style="width:100%;">
                 <thead><tr>
                     <th style="width:30px;">#</th>
@@ -242,26 +330,26 @@
                     <th style="text-align:right;">持股</th>
                     <th style="width:80px;">幅度</th>
                 </tr></thead>
-                <tbody><tr><td style="text-align:center;color:#888;">1</td><td><b>3550</b> 聯穎</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+9.0%</td><td style="text-align:right;">13.9%</td><td><div style="background:linear-gradient(90deg,#00ff0044 72.1489390980939%,transparent 72.1489390980939%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">2</td><td><b>2399</b> 映泰</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+7.7%</td><td style="text-align:right;">11.8%</td><td><div style="background:linear-gradient(90deg,#00ff0044 61.71579562043795%,transparent 61.71579562043795%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">3</td><td><b>3060</b> 銘異</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+7.0%</td><td style="text-align:right;">14.9%</td><td><div style="background:linear-gradient(90deg,#00ff0044 55.913262180093376%,transparent 55.913262180093376%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">4</td><td><b>2243</b> 宏旭-KY</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+6.2%</td><td style="text-align:right;">32.0%</td><td><div style="background:linear-gradient(90deg,#00ff0044 49.71481297754838%,transparent 49.71481297754838%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">5</td><td><b>2492</b> 華新科</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+6.0%</td><td style="text-align:right;">31.4%</td><td><div style="background:linear-gradient(90deg,#00ff0044 48.13313106335784%,transparent 48.13313106335784%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">6</td><td><b>2413</b> 環科</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+6.0%</td><td style="text-align:right;">9.3%</td><td><div style="background:linear-gradient(90deg,#00ff0044 47.789291390021305%,transparent 47.789291390021305%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">7</td><td><b>3293</b> 鈊象</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+5.3%</td><td style="text-align:right;">9.1%</td><td><div style="background:linear-gradient(90deg,#00ff0044 42.65197964127665%,transparent 42.65197964127665%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">8</td><td><b>8996</b> 高力</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+5.2%</td><td style="text-align:right;">42.4%</td><td><div style="background:linear-gradient(90deg,#00ff0044 41.56666557251515%,transparent 41.56666557251515%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">9</td><td><b>3413</b> 京鼎</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+5.2%</td><td style="text-align:right;">18.1%</td><td><div style="background:linear-gradient(90deg,#00ff0044 41.22641729819827%,transparent 41.22641729819827%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">10</td><td><b>2344</b> 華邦電</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+4.9%</td><td style="text-align:right;">33.5%</td><td><div style="background:linear-gradient(90deg,#00ff0044 39.27969335201314%,transparent 39.27969335201314%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">11</td><td><b>3189</b> 景碩</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+4.9%</td><td style="text-align:right;">28.1%</td><td><div style="background:linear-gradient(90deg,#00ff0044 38.998381904935%,transparent 38.998381904935%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">12</td><td><b>3596</b> 智易</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+4.8%</td><td style="text-align:right;">34.6%</td><td><div style="background:linear-gradient(90deg,#00ff0044 38.18247146276747%,transparent 38.18247146276747%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">13</td><td><b>6269</b> 台郡</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+4.7%</td><td style="text-align:right;">21.5%</td><td><div style="background:linear-gradient(90deg,#00ff0044 37.632977743260255%,transparent 37.632977743260255%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">14</td><td><b>2408</b> 南亞科</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+4.7%</td><td style="text-align:right;">19.5%</td><td><div style="background:linear-gradient(90deg,#00ff0044 37.396772147227026%,transparent 37.396772147227026%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">15</td><td><b>3149</b> 正達</td><td style="text-align:right;color:#00ff00;font-weight:bold;">+4.6%</td><td style="text-align:right;">8.1%</td><td><div style="background:linear-gradient(90deg,#00ff0044 37.0890537205958%,transparent 37.0890537205958%);height:18px;border-radius:3px;"></div></td></tr>
+                <tbody><tr><td style="text-align:center;color:#7a6a52;">1</td><td><b>3550</b> 聯穎</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+9.0%</td><td style="text-align:right;">13.9%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 72.1489390980939%,transparent 72.1489390980939%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">2</td><td><b>2399</b> 映泰</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+7.7%</td><td style="text-align:right;">11.8%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 61.71579562043795%,transparent 61.71579562043795%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">3</td><td><b>3060</b> 銘異</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+7.0%</td><td style="text-align:right;">14.9%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 55.913262180093376%,transparent 55.913262180093376%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">4</td><td><b>2243</b> 宏旭-KY</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+6.2%</td><td style="text-align:right;">32.0%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 49.71481297754838%,transparent 49.71481297754838%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">5</td><td><b>2492</b> 華新科</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+6.0%</td><td style="text-align:right;">31.4%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 48.13313106335784%,transparent 48.13313106335784%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">6</td><td><b>2413</b> 環科</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+6.0%</td><td style="text-align:right;">9.3%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 47.789291390021305%,transparent 47.789291390021305%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">7</td><td><b>3293</b> 鈊象</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+5.3%</td><td style="text-align:right;">9.1%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 42.65197964127665%,transparent 42.65197964127665%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">8</td><td><b>8996</b> 高力</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+5.2%</td><td style="text-align:right;">42.4%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 41.56666557251515%,transparent 41.56666557251515%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">9</td><td><b>3413</b> 京鼎</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+5.2%</td><td style="text-align:right;">18.1%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 41.22641729819827%,transparent 41.22641729819827%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">10</td><td><b>2344</b> 華邦電</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+4.9%</td><td style="text-align:right;">33.5%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 39.27969335201314%,transparent 39.27969335201314%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">11</td><td><b>3189</b> 景碩</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+4.9%</td><td style="text-align:right;">28.1%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 38.998381904935%,transparent 38.998381904935%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">12</td><td><b>3596</b> 智易</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+4.8%</td><td style="text-align:right;">34.6%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 38.18247146276747%,transparent 38.18247146276747%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">13</td><td><b>6269</b> 台郡</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+4.7%</td><td style="text-align:right;">21.5%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 37.632977743260255%,transparent 37.632977743260255%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">14</td><td><b>2408</b> 南亞科</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+4.7%</td><td style="text-align:right;">19.5%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 37.396772147227026%,transparent 37.396772147227026%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">15</td><td><b>3149</b> 正達</td><td style="text-align:right;color:#2f7d4f;font-weight:bold;">+4.6%</td><td style="text-align:right;">8.1%</td><td><div style="background:linear-gradient(90deg,#2f7d4f44 37.0890537205958%,transparent 37.0890537205958%);height:18px;border-radius:3px;"></div></td></tr>
 </tbody>
             </table>
         </div>
         <div>
-            <h3 style="color:#ff4444;margin-bottom:8px;">🔴 法人賣超 Top-15（20日）</h3>
+            <h3 style="color:#b4452f;margin-bottom:8px;">🔴 法人賣超 Top-15（20日）</h3>
             <table style="width:100%;">
                 <thead><tr>
                     <th style="width:30px;">#</th>
@@ -270,21 +358,21 @@
                     <th style="text-align:right;">持股</th>
                     <th style="width:80px;">幅度</th>
                 </tr></thead>
-                <tbody><tr><td style="text-align:center;color:#888;">1</td><td><b>2474</b> 可成</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-9.4%</td><td style="text-align:right;">1.4%</td><td><div style="background:linear-gradient(90deg,#ff444444 75.06420446806662%,transparent 75.06420446806662%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">2</td><td><b>9904</b> 寶成</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-8.1%</td><td style="text-align:right;">27.9%</td><td><div style="background:linear-gradient(90deg,#ff444444 64.61299309372288%,transparent 64.61299309372288%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">3</td><td><b>1582</b> 信錦</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-8.0%</td><td style="text-align:right;">4.4%</td><td><div style="background:linear-gradient(90deg,#ff444444 64.20973919231935%,transparent 64.20973919231935%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">4</td><td><b>0057</b> 富邦摩台</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-6.9%</td><td style="text-align:right;">-1.9%</td><td><div style="background:linear-gradient(90deg,#ff444444 55.223470857891286%,transparent 55.223470857891286%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">5</td><td><b>2486</b> 一詮</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-6.6%</td><td style="text-align:right;">13.5%</td><td><div style="background:linear-gradient(90deg,#ff444444 52.672096996109715%,transparent 52.672096996109715%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">6</td><td><b>5439</b> 高技</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-6.1%</td><td style="text-align:right;">-2.4%</td><td><div style="background:linear-gradient(90deg,#ff444444 48.948744186597786%,transparent 48.948744186597786%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">7</td><td><b>8261</b> 富鼎</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-6.0%</td><td style="text-align:right;">4.1%</td><td><div style="background:linear-gradient(90deg,#ff444444 48.20109084072555%,transparent 48.20109084072555%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">8</td><td><b>2324</b> 仁寶</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-5.8%</td><td style="text-align:right;">22.9%</td><td><div style="background:linear-gradient(90deg,#ff444444 46.41229939337455%,transparent 46.41229939337455%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">9</td><td><b>3450</b> 聯鈞</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-5.8%</td><td style="text-align:right;">19.1%</td><td><div style="background:linear-gradient(90deg,#ff444444 46.203869191740665%,transparent 46.203869191740665%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">10</td><td><b>3163</b> 波若威</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-5.6%</td><td style="text-align:right;">4.3%</td><td><div style="background:linear-gradient(90deg,#ff444444 44.63930124506801%,transparent 44.63930124506801%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">11</td><td><b>2402</b> 毅嘉</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-5.6%</td><td style="text-align:right;">4.1%</td><td><div style="background:linear-gradient(90deg,#ff444444 44.58580535978142%,transparent 44.58580535978142%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">12</td><td><b>6176</b> 瑞儀</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-5.5%</td><td style="text-align:right;">5.4%</td><td><div style="background:linear-gradient(90deg,#ff444444 43.97651117637806%,transparent 43.97651117637806%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">13</td><td><b>4916</b> 事欣科</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-5.3%</td><td style="text-align:right;">16.6%</td><td><div style="background:linear-gradient(90deg,#ff444444 42.62507156683958%,transparent 42.62507156683958%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">14</td><td><b>2355</b> 敬鵬</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-5.3%</td><td style="text-align:right;">15.7%</td><td><div style="background:linear-gradient(90deg,#ff444444 42.47780557169689%,transparent 42.47780557169689%);height:18px;border-radius:3px;"></div></td></tr>
-<tr><td style="text-align:center;color:#888;">15</td><td><b>1504</b> 東元</td><td style="text-align:right;color:#ff4444;font-weight:bold;">-5.1%</td><td style="text-align:right;">-0.2%</td><td><div style="background:linear-gradient(90deg,#ff444444 40.69443276277457%,transparent 40.69443276277457%);height:18px;border-radius:3px;"></div></td></tr>
+                <tbody><tr><td style="text-align:center;color:#7a6a52;">1</td><td><b>2474</b> 可成</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-9.4%</td><td style="text-align:right;">1.4%</td><td><div style="background:linear-gradient(90deg,#b4452f44 75.06420446806662%,transparent 75.06420446806662%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">2</td><td><b>9904</b> 寶成</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-8.1%</td><td style="text-align:right;">27.9%</td><td><div style="background:linear-gradient(90deg,#b4452f44 64.61299309372288%,transparent 64.61299309372288%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">3</td><td><b>1582</b> 信錦</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-8.0%</td><td style="text-align:right;">4.4%</td><td><div style="background:linear-gradient(90deg,#b4452f44 64.20973919231935%,transparent 64.20973919231935%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">4</td><td><b>0057</b> 富邦摩台</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-6.9%</td><td style="text-align:right;">-1.9%</td><td><div style="background:linear-gradient(90deg,#b4452f44 55.223470857891286%,transparent 55.223470857891286%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">5</td><td><b>2486</b> 一詮</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-6.6%</td><td style="text-align:right;">13.5%</td><td><div style="background:linear-gradient(90deg,#b4452f44 52.672096996109715%,transparent 52.672096996109715%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">6</td><td><b>5439</b> 高技</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-6.1%</td><td style="text-align:right;">-2.4%</td><td><div style="background:linear-gradient(90deg,#b4452f44 48.948744186597786%,transparent 48.948744186597786%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">7</td><td><b>8261</b> 富鼎</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-6.0%</td><td style="text-align:right;">4.1%</td><td><div style="background:linear-gradient(90deg,#b4452f44 48.20109084072555%,transparent 48.20109084072555%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">8</td><td><b>2324</b> 仁寶</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-5.8%</td><td style="text-align:right;">22.9%</td><td><div style="background:linear-gradient(90deg,#b4452f44 46.41229939337455%,transparent 46.41229939337455%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">9</td><td><b>3450</b> 聯鈞</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-5.8%</td><td style="text-align:right;">19.1%</td><td><div style="background:linear-gradient(90deg,#b4452f44 46.203869191740665%,transparent 46.203869191740665%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">10</td><td><b>3163</b> 波若威</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-5.6%</td><td style="text-align:right;">4.3%</td><td><div style="background:linear-gradient(90deg,#b4452f44 44.63930124506801%,transparent 44.63930124506801%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">11</td><td><b>2402</b> 毅嘉</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-5.6%</td><td style="text-align:right;">4.1%</td><td><div style="background:linear-gradient(90deg,#b4452f44 44.58580535978142%,transparent 44.58580535978142%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">12</td><td><b>6176</b> 瑞儀</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-5.5%</td><td style="text-align:right;">5.4%</td><td><div style="background:linear-gradient(90deg,#b4452f44 43.97651117637806%,transparent 43.97651117637806%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">13</td><td><b>4916</b> 事欣科</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-5.3%</td><td style="text-align:right;">16.6%</td><td><div style="background:linear-gradient(90deg,#b4452f44 42.62507156683958%,transparent 42.62507156683958%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">14</td><td><b>2355</b> 敬鵬</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-5.3%</td><td style="text-align:right;">15.7%</td><td><div style="background:linear-gradient(90deg,#b4452f44 42.47780557169689%,transparent 42.47780557169689%);height:18px;border-radius:3px;"></div></td></tr>
+<tr><td style="text-align:center;color:#7a6a52;">15</td><td><b>1504</b> 東元</td><td style="text-align:right;color:#b4452f;font-weight:bold;">-5.1%</td><td style="text-align:right;">-0.2%</td><td><div style="background:linear-gradient(90deg,#b4452f44 40.69443276277457%,transparent 40.69443276277457%);height:18px;border-radius:3px;"></div></td></tr>
 </tbody>
             </table>
         </div>
@@ -306,9 +394,9 @@
             <div class="label">0050 Sharpe</div>
             <div class="value">nan</div>
         </div>
-        <div class="stat-card" style="border-left-color:#ff4444">
+        <div class="stat-card" style="border-left-color:#b4452f">
             <div class="label">超額年化報酬 (α)</div>
-            <div class="value" style="color:#ff4444">+nan%</div>
+            <div class="value" style="color:#b4452f">+nan%</div>
         </div>
     </div>
 
@@ -325,9 +413,9 @@
             <div class="label">00981A Sharpe</div>
             <div class="value">nan</div>
         </div>
-        <div class="stat-card" style="border-left-color:#ff4444">
+        <div class="stat-card" style="border-left-color:#b4452f">
             <div class="label">超額 vs 00981A (共存期)</div>
-            <div class="value" style="color:#ff4444">+nan%</div>
+            <div class="value" style="color:#b4452f">+nan%</div>
         </div>
     </div>
     <img src="backtest_chart.png" alt="AI Quantitative Backtest Equity Curve with Benchmark">
@@ -336,21 +424,21 @@
     <p class="section-note">判斷目前市場 regime 與近期趨勢，幫助你決定是否積極或保守操作。</p>
 
     <div class="stats">
-        <div class="stat-card" style="border-left-color:#ff4444">
+        <div class="stat-card" style="border-left-color:#b4452f">
             <div class="label">大盤 Regime</div>
-            <div class="value" style="color:#ff4444">🔴 空頭</div>
+            <div class="value" style="color:#b4452f">🔴 空頭</div>
         </div>
         <div class="stat-card benchmark">
             <div class="label">0050 近 5 日</div>
-            <div class="value" style="color:#ff4444">+nan%</div>
+            <div class="value" style="color:#b4452f">+nan%</div>
         </div>
         <div class="stat-card benchmark">
             <div class="label">0050 近 20 日</div>
-            <div class="value" style="color:#ff4444">+nan%</div>
+            <div class="value" style="color:#b4452f">+nan%</div>
         </div>
         <div class="stat-card benchmark">
             <div class="label">0050 近 60 日</div>
-            <div class="value" style="color:#ff4444">+nan%</div>
+            <div class="value" style="color:#b4452f">+nan%</div>
         </div>
         <div class="stat-card risk">
             <div class="label">市場波動率 (20D)</div>
@@ -364,7 +452,7 @@
     <div class="stats">
         <div class="stat-card risk">
             <div class="label">目前回撤</div>
-            <div class="value" style="color:#ffab00">-6.7%</div>
+            <div class="value" style="color:#fbbf24">-6.7%</div>
         </div>
         <div class="stat-card">
             <div class="label">權益最高點</div>
@@ -378,11 +466,11 @@
     <table>
         <thead><tr><th>#</th><th>開始日</th><th>恢復日</th><th>最大深度</th><th>持續天數</th></tr></thead>
         <tbody>
-<tr><td>#1</td><td>2023-07-25</td><td>2026-05-25</td><td style="color:#ff4444; font-weight:bold">-42.4%</td><td>1035 天</td></tr>
-<tr><td>#2</td><td>2026-06-04</td><td>2026-06-18</td><td style="color:#ff4444; font-weight:bold">-16.5%</td><td>14 天</td></tr>
-<tr><td>#3</td><td>2023-06-26</td><td>2023-07-04</td><td style="color:#ff4444; font-weight:bold">-8.2%</td><td>8 天</td></tr>
-<tr><td>#4</td><td>2023-07-18</td><td>2023-07-21</td><td style="color:#ff4444; font-weight:bold">-6.4%</td><td>3 天</td></tr>
-<tr><td>#5</td><td>2023-07-05</td><td>2023-07-11</td><td style="color:#ff4444; font-weight:bold">-3.4%</td><td>6 天</td></tr>
+<tr><td>#1</td><td>2023-07-25</td><td>2026-05-25</td><td style="color:#b4452f; font-weight:bold">-42.4%</td><td>1035 天</td></tr>
+<tr><td>#2</td><td>2026-06-04</td><td>2026-06-18</td><td style="color:#b4452f; font-weight:bold">-16.5%</td><td>14 天</td></tr>
+<tr><td>#3</td><td>2023-06-26</td><td>2023-07-04</td><td style="color:#b4452f; font-weight:bold">-8.2%</td><td>8 天</td></tr>
+<tr><td>#4</td><td>2023-07-18</td><td>2023-07-21</td><td style="color:#b4452f; font-weight:bold">-6.4%</td><td>3 天</td></tr>
+<tr><td>#5</td><td>2023-07-05</td><td>2023-07-11</td><td style="color:#b4452f; font-weight:bold">-3.4%</td><td>6 天</td></tr>
 
         </tbody>
     </table>
@@ -391,9 +479,9 @@
     <p class="section-note">近期表現是否仍在健康範圍內，偏離均值時需警惕。</p>
 
     <div class="stats">
-        <div class="stat-card" style="border-left-color:#00ff00">
+        <div class="stat-card" style="border-left-color:#2f7d4f">
             <div class="label">近 60 日 Sharpe</div>
-            <div class="value" style="color:#00ff00">3.17</div>
+            <div class="value" style="color:#2f7d4f">3.17</div>
         </div>
         <div class="stat-card">
             <div class="label">歷史平均 Sharpe</div>
@@ -415,11 +503,11 @@
     <div class="stats">
         <div class="stat-card">
             <div class="label">最長連勝</div>
-            <div class="value" style="color:#00ff00">8 筆</div>
+            <div class="value" style="color:#2f7d4f">8 筆</div>
         </div>
         <div class="stat-card risk">
             <div class="label">最長連敗</div>
-            <div class="value" style="color:#ff4444">14 筆</div>
+            <div class="value" style="color:#b4452f">14 筆</div>
         </div>
         <div class="stat-card">
             <div class="label">近 5 筆走勢</div>
@@ -431,9 +519,9 @@
     <table>
         <thead><tr><th>出場原因</th><th>次數</th><th>平均報酬</th></tr></thead>
         <tbody>
-<tr><td>🟡 移動停利</td><td>473 筆</td><td style="color:#00ff00">+1.29%</td></tr>
-<tr><td>⚪ 時間到期</td><td>199 筆</td><td style="color:#00ff00">+6.50%</td></tr>
-<tr><td>🔴 停損</td><td>149 筆</td><td style="color:#ff4444">-11.23%</td></tr>
+<tr><td>🟡 移動停利</td><td>473 筆</td><td style="color:#2f7d4f">+1.29%</td></tr>
+<tr><td>⚪ 時間到期</td><td>199 筆</td><td style="color:#2f7d4f">+6.50%</td></tr>
+<tr><td>🔴 停損</td><td>149 筆</td><td style="color:#b4452f">-11.23%</td></tr>
 
         </tbody>
     </table>
@@ -443,43 +531,43 @@
 
     <table>
         <thead><tr><th>報酬區間</th><th>筆數</th><th>佔比</th><th>分布</th></tr></thead>
-        <tbody><tr><td>< -15%</td><td>29</td><td>3.5%</td><td><div style="background:#ff4444; width:10.596833130328868%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
-<tr><td>-15~-10%</td><td>96</td><td>11.7%</td><td><div style="background:#ff4444; width:35.07917174177832%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
-<tr><td>-10~-5%</td><td>195</td><td>23.8%</td><td><div style="background:#ff4444; width:71.2545676004872%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
-<tr><td>-5~0%</td><td>151</td><td>18.4%</td><td><div style="background:#ff4444; width:55.176613885505475%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
-<tr><td>0~5%</td><td>130</td><td>15.8%</td><td><div style="background:#00ff00; width:47.503045066991476%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
-<tr><td>5~10%</td><td>95</td><td>11.6%</td><td><div style="background:#00ff00; width:34.71376370280146%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
-<tr><td>10~20%</td><td>68</td><td>8.3%</td><td><div style="background:#00ff00; width:24.84774665042631%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
-<tr><td>> 20%</td><td>57</td><td>6.9%</td><td><div style="background:#00ff00; width:20.828258221680876%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
+        <tbody><tr><td>< -15%</td><td>29</td><td>3.5%</td><td><div style="background:#b4452f; width:10.596833130328868%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
+<tr><td>-15~-10%</td><td>96</td><td>11.7%</td><td><div style="background:#b4452f; width:35.07917174177832%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
+<tr><td>-10~-5%</td><td>195</td><td>23.8%</td><td><div style="background:#b4452f; width:71.2545676004872%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
+<tr><td>-5~0%</td><td>151</td><td>18.4%</td><td><div style="background:#b4452f; width:55.176613885505475%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
+<tr><td>0~5%</td><td>130</td><td>15.8%</td><td><div style="background:#2f7d4f; width:47.503045066991476%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
+<tr><td>5~10%</td><td>95</td><td>11.6%</td><td><div style="background:#2f7d4f; width:34.71376370280146%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
+<tr><td>10~20%</td><td>68</td><td>8.3%</td><td><div style="background:#2f7d4f; width:24.84774665042631%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
+<tr><td>> 20%</td><td>57</td><td>6.9%</td><td><div style="background:#2f7d4f; width:20.828258221680876%; height:14px; border-radius:3px; opacity:0.6"></div></td></tr>
 </tbody>
     </table>
 
     <h2>🏅 個股績效排行榜</h2>
     <p class="section-note">哪些股票貢獻最多利潤、哪些持續虧損，幫助判讀信號品質。</p>
 
-    <h3 style="color:#00e5ff; margin-top:16px">🏆 Top 10 貢獻股</h3>
+    <h3 style="color:#9c6b3f; margin-top:16px">🏆 Top 10 貢獻股</h3>
     <table>
         <thead><tr><th>股票</th><th>交易數</th><th>勝率</th><th>平均報酬</th><th>總貢獻</th></tr></thead>
-        <tbody><tr><td><b>3017</b></td><td>20</td><td style="color:#00ff00">55%</td><td style="color:#00ff00">+5.9%</td><td style="color:#00ff00; font-weight:bold">+117.6%</td></tr>
-<tr><td><b>2408</b></td><td>23</td><td style="color:#00ff00">61%</td><td style="color:#00ff00">+4.1%</td><td style="color:#00ff00; font-weight:bold">+95.2%</td></tr>
-<tr><td><b>2308</b></td><td>10</td><td style="color:#00ff00">70%</td><td style="color:#00ff00">+9.0%</td><td style="color:#00ff00; font-weight:bold">+90.5%</td></tr>
-<tr><td><b>2383</b></td><td>23</td><td style="color:#00ff00">52%</td><td style="color:#00ff00">+3.7%</td><td style="color:#00ff00; font-weight:bold">+84.1%</td></tr>
-<tr><td><b>2344</b></td><td>16</td><td style="color:#00ff00">50%</td><td style="color:#00ff00">+4.9%</td><td style="color:#00ff00; font-weight:bold">+78.6%</td></tr>
-<tr><td><b>3533</b></td><td>8</td><td style="color:#00ff00">75%</td><td style="color:#00ff00">+9.3%</td><td style="color:#00ff00; font-weight:bold">+74.7%</td></tr>
-<tr><td><b>2382</b></td><td>8</td><td style="color:#00ff00">62%</td><td style="color:#00ff00">+9.2%</td><td style="color:#00ff00; font-weight:bold">+73.9%</td></tr>
-<tr><td><b>1519</b></td><td>35</td><td style="color:#ff4444">40%</td><td style="color:#00ff00">+2.1%</td><td style="color:#00ff00; font-weight:bold">+73.6%</td></tr>
-<tr><td><b>2327</b></td><td>12</td><td style="color:#00ff00">58%</td><td style="color:#00ff00">+6.0%</td><td style="color:#00ff00; font-weight:bold">+72.0%</td></tr>
-<tr><td><b>2345</b></td><td>18</td><td style="color:#00ff00">56%</td><td style="color:#00ff00">+3.7%</td><td style="color:#00ff00; font-weight:bold">+66.5%</td></tr>
+        <tbody><tr><td><b>3017</b></td><td>20</td><td style="color:#2f7d4f">55%</td><td style="color:#2f7d4f">+5.9%</td><td style="color:#2f7d4f; font-weight:bold">+117.6%</td></tr>
+<tr><td><b>2408</b></td><td>23</td><td style="color:#2f7d4f">61%</td><td style="color:#2f7d4f">+4.1%</td><td style="color:#2f7d4f; font-weight:bold">+95.2%</td></tr>
+<tr><td><b>2308</b></td><td>10</td><td style="color:#2f7d4f">70%</td><td style="color:#2f7d4f">+9.0%</td><td style="color:#2f7d4f; font-weight:bold">+90.5%</td></tr>
+<tr><td><b>2383</b></td><td>23</td><td style="color:#2f7d4f">52%</td><td style="color:#2f7d4f">+3.7%</td><td style="color:#2f7d4f; font-weight:bold">+84.1%</td></tr>
+<tr><td><b>2344</b></td><td>16</td><td style="color:#2f7d4f">50%</td><td style="color:#2f7d4f">+4.9%</td><td style="color:#2f7d4f; font-weight:bold">+78.6%</td></tr>
+<tr><td><b>3533</b></td><td>8</td><td style="color:#2f7d4f">75%</td><td style="color:#2f7d4f">+9.3%</td><td style="color:#2f7d4f; font-weight:bold">+74.7%</td></tr>
+<tr><td><b>2382</b></td><td>8</td><td style="color:#2f7d4f">62%</td><td style="color:#2f7d4f">+9.2%</td><td style="color:#2f7d4f; font-weight:bold">+73.9%</td></tr>
+<tr><td><b>1519</b></td><td>35</td><td style="color:#b4452f">40%</td><td style="color:#2f7d4f">+2.1%</td><td style="color:#2f7d4f; font-weight:bold">+73.6%</td></tr>
+<tr><td><b>2327</b></td><td>12</td><td style="color:#2f7d4f">58%</td><td style="color:#2f7d4f">+6.0%</td><td style="color:#2f7d4f; font-weight:bold">+72.0%</td></tr>
+<tr><td><b>2345</b></td><td>18</td><td style="color:#2f7d4f">56%</td><td style="color:#2f7d4f">+3.7%</td><td style="color:#2f7d4f; font-weight:bold">+66.5%</td></tr>
 </tbody>
     </table>
-    <h3 style="color:#ff4444; margin-top:16px">📉 Bottom 5 虧損股</h3>
+    <h3 style="color:#b4452f; margin-top:16px">📉 Bottom 5 虧損股</h3>
     <table>
         <thead><tr><th>股票</th><th>交易數</th><th>勝率</th><th>平均報酬</th><th>總貢獻</th></tr></thead>
-        <tbody><tr style="opacity:0.7"><td><b>6415</b></td><td>18</td><td style="color:#ff4444">33%</td><td style="color:#ff4444">-2.9%</td><td style="color:#ff4444; font-weight:bold">-53.0%</td></tr>
-<tr style="opacity:0.7"><td><b>2609</b></td><td>15</td><td style="color:#ff4444">33%</td><td style="color:#ff4444">-3.8%</td><td style="color:#ff4444; font-weight:bold">-56.5%</td></tr>
-<tr style="opacity:0.7"><td><b>3706</b></td><td>14</td><td style="color:#ff4444">21%</td><td style="color:#ff4444">-5.2%</td><td style="color:#ff4444; font-weight:bold">-72.5%</td></tr>
-<tr style="opacity:0.7"><td><b>2449</b></td><td>19</td><td style="color:#ff4444">32%</td><td style="color:#ff4444">-3.9%</td><td style="color:#ff4444; font-weight:bold">-73.5%</td></tr>
-<tr style="opacity:0.7"><td><b>2603</b></td><td>20</td><td style="color:#ff4444">30%</td><td style="color:#ff4444">-4.0%</td><td style="color:#ff4444; font-weight:bold">-80.3%</td></tr>
+        <tbody><tr style="opacity:0.7"><td><b>6415</b></td><td>18</td><td style="color:#b4452f">33%</td><td style="color:#b4452f">-2.9%</td><td style="color:#b4452f; font-weight:bold">-53.0%</td></tr>
+<tr style="opacity:0.7"><td><b>2609</b></td><td>15</td><td style="color:#b4452f">33%</td><td style="color:#b4452f">-3.8%</td><td style="color:#b4452f; font-weight:bold">-56.5%</td></tr>
+<tr style="opacity:0.7"><td><b>3706</b></td><td>14</td><td style="color:#b4452f">21%</td><td style="color:#b4452f">-5.2%</td><td style="color:#b4452f; font-weight:bold">-72.5%</td></tr>
+<tr style="opacity:0.7"><td><b>2449</b></td><td>19</td><td style="color:#b4452f">32%</td><td style="color:#b4452f">-3.9%</td><td style="color:#b4452f; font-weight:bold">-73.5%</td></tr>
+<tr style="opacity:0.7"><td><b>2603</b></td><td>20</td><td style="color:#b4452f">30%</td><td style="color:#b4452f">-4.0%</td><td style="color:#b4452f; font-weight:bold">-80.3%</td></tr>
 </tbody>
     </table>
 
@@ -493,26 +581,26 @@
             </tr>
         </thead>
         <tbody>
-<tr><td>6116</td><td>2026-06-08</td><td>2026-06-11</td><td>16.7</td><td>13.4</td><td>🔴 停損</td><td>3天</td><td style="color:#ff4444; font-weight:bold;">-19.9%</td></tr>
-<tr><td>2356</td><td>2026-06-05</td><td>2026-06-11</td><td>76.6</td><td>64.8</td><td>🔴 停損</td><td>4天</td><td style="color:#ff4444; font-weight:bold;">-16.0%</td></tr>
-<tr><td>3481</td><td>2026-06-05</td><td>2026-06-11</td><td>52.1</td><td>42.0</td><td>🔴 停損</td><td>4天</td><td style="color:#ff4444; font-weight:bold;">-20.1%</td></tr>
-<tr><td>2327</td><td>2026-06-04</td><td>2026-06-11</td><td>770.2</td><td>779.9</td><td>🟡 移動停利</td><td>5天</td><td style="color:#00ff00; font-weight:bold;">+0.6%</td></tr>
-<tr><td>3149</td><td>2026-06-04</td><td>2026-06-10</td><td>90.1</td><td>80.4</td><td>🟡 移動停利</td><td>4天</td><td style="color:#ff4444; font-weight:bold;">-11.3%</td></tr>
-<tr><td>2357</td><td>2026-06-05</td><td>2026-06-08</td><td>910.9</td><td>819.8</td><td>🔴 停損</td><td>1天</td><td style="color:#ff4444; font-weight:bold;">-10.6%</td></tr>
-<tr><td>6239</td><td>2026-06-02</td><td>2026-06-08</td><td>369.9</td><td>304.5</td><td>🔴 停損</td><td>4天</td><td style="color:#ff4444; font-weight:bold;">-18.2%</td></tr>
-<tr><td>6285</td><td>2026-05-29</td><td>2026-06-08</td><td>316.3</td><td>263.0</td><td>🟡 移動停利</td><td>6天</td><td style="color:#ff4444; font-weight:bold;">-17.4%</td></tr>
-<tr><td>2881</td><td>2026-05-20</td><td>2026-06-08</td><td>97.2</td><td>112.0</td><td>🟡 移動停利</td><td>13天</td><td style="color:#00ff00; font-weight:bold;">+14.4%</td></tr>
-<tr><td>2356</td><td>2026-06-04</td><td>2026-06-05</td><td>84.7</td><td>73.8</td><td>🔴 停損</td><td>1天</td><td style="color:#ff4444; font-weight:bold;">-13.5%</td></tr>
-<tr><td>6116</td><td>2026-06-04</td><td>2026-06-05</td><td>21.6</td><td>18.4</td><td>🔴 停損</td><td>1天</td><td style="color:#ff4444; font-weight:bold;">-15.2%</td></tr>
-<tr><td>3481</td><td>2026-05-27</td><td>2026-06-05</td><td>46.0</td><td>52.0</td><td>🟡 移動停利</td><td>7天</td><td style="color:#00ff00; font-weight:bold;">+12.3%</td></tr>
-<tr><td>2454</td><td>2026-05-19</td><td>2026-06-05</td><td>3478.5</td><td>4360.0</td><td>🟡 移動停利</td><td>13天</td><td style="color:#00ff00; font-weight:bold;">+24.5%</td></tr>
-<tr><td>2408</td><td>2026-05-18</td><td>2026-06-05</td><td>300.3</td><td>370.0</td><td>🟡 移動停利</td><td>14天</td><td style="color:#00ff00; font-weight:bold;">+22.4%</td></tr>
-<tr><td>2356</td><td>2026-06-02</td><td>2026-06-04</td><td>77.1</td><td>79.3</td><td>🟡 移動停利</td><td>2天</td><td style="color:#00ff00; font-weight:bold;">+2.2%</td></tr>
-<tr><td>2303</td><td>2026-06-02</td><td>2026-06-04</td><td>147.2</td><td>123.0</td><td>🔴 停損</td><td>2天</td><td style="color:#ff4444; font-weight:bold;">-17.0%</td></tr>
-<tr><td>6116</td><td>2026-05-28</td><td>2026-06-04</td><td>14.7</td><td>20.7</td><td>🟡 移動停利</td><td>5天</td><td style="color:#00ff00; font-weight:bold;">+39.9%</td></tr>
-<tr><td>2327</td><td>2026-05-18</td><td>2026-06-04</td><td>472.1</td><td>769.5</td><td>🟡 移動停利</td><td>13天</td><td style="color:#00ff00; font-weight:bold;">+61.9%</td></tr>
-<tr><td>6415</td><td>2026-05-28</td><td>2026-06-02</td><td>667.7</td><td>570.1</td><td>🔴 停損</td><td>3天</td><td style="color:#ff4444; font-weight:bold;">-15.2%</td></tr>
-<tr><td>6239</td><td>2026-05-18</td><td>2026-06-02</td><td>245.8</td><td>353.9</td><td>🟡 移動停利</td><td>11天</td><td style="color:#00ff00; font-weight:bold;">+43.0%</td></tr>
+<tr><td>6116</td><td>2026-06-08</td><td>2026-06-11</td><td>16.7</td><td>13.4</td><td>🔴 停損</td><td>3天</td><td style="color:#b4452f; font-weight:bold;">-19.9%</td></tr>
+<tr><td>2356</td><td>2026-06-05</td><td>2026-06-11</td><td>76.6</td><td>64.8</td><td>🔴 停損</td><td>4天</td><td style="color:#b4452f; font-weight:bold;">-16.0%</td></tr>
+<tr><td>3481</td><td>2026-06-05</td><td>2026-06-11</td><td>52.1</td><td>42.0</td><td>🔴 停損</td><td>4天</td><td style="color:#b4452f; font-weight:bold;">-20.1%</td></tr>
+<tr><td>2327</td><td>2026-06-04</td><td>2026-06-11</td><td>770.2</td><td>779.9</td><td>🟡 移動停利</td><td>5天</td><td style="color:#2f7d4f; font-weight:bold;">+0.6%</td></tr>
+<tr><td>3149</td><td>2026-06-04</td><td>2026-06-10</td><td>90.1</td><td>80.4</td><td>🟡 移動停利</td><td>4天</td><td style="color:#b4452f; font-weight:bold;">-11.3%</td></tr>
+<tr><td>2357</td><td>2026-06-05</td><td>2026-06-08</td><td>910.9</td><td>819.8</td><td>🔴 停損</td><td>1天</td><td style="color:#b4452f; font-weight:bold;">-10.6%</td></tr>
+<tr><td>6239</td><td>2026-06-02</td><td>2026-06-08</td><td>369.9</td><td>304.5</td><td>🔴 停損</td><td>4天</td><td style="color:#b4452f; font-weight:bold;">-18.2%</td></tr>
+<tr><td>6285</td><td>2026-05-29</td><td>2026-06-08</td><td>316.3</td><td>263.0</td><td>🟡 移動停利</td><td>6天</td><td style="color:#b4452f; font-weight:bold;">-17.4%</td></tr>
+<tr><td>2881</td><td>2026-05-20</td><td>2026-06-08</td><td>97.2</td><td>112.0</td><td>🟡 移動停利</td><td>13天</td><td style="color:#2f7d4f; font-weight:bold;">+14.4%</td></tr>
+<tr><td>2356</td><td>2026-06-04</td><td>2026-06-05</td><td>84.7</td><td>73.8</td><td>🔴 停損</td><td>1天</td><td style="color:#b4452f; font-weight:bold;">-13.5%</td></tr>
+<tr><td>6116</td><td>2026-06-04</td><td>2026-06-05</td><td>21.6</td><td>18.4</td><td>🔴 停損</td><td>1天</td><td style="color:#b4452f; font-weight:bold;">-15.2%</td></tr>
+<tr><td>3481</td><td>2026-05-27</td><td>2026-06-05</td><td>46.0</td><td>52.0</td><td>🟡 移動停利</td><td>7天</td><td style="color:#2f7d4f; font-weight:bold;">+12.3%</td></tr>
+<tr><td>2454</td><td>2026-05-19</td><td>2026-06-05</td><td>3478.5</td><td>4360.0</td><td>🟡 移動停利</td><td>13天</td><td style="color:#2f7d4f; font-weight:bold;">+24.5%</td></tr>
+<tr><td>2408</td><td>2026-05-18</td><td>2026-06-05</td><td>300.3</td><td>370.0</td><td>🟡 移動停利</td><td>14天</td><td style="color:#2f7d4f; font-weight:bold;">+22.4%</td></tr>
+<tr><td>2356</td><td>2026-06-02</td><td>2026-06-04</td><td>77.1</td><td>79.3</td><td>🟡 移動停利</td><td>2天</td><td style="color:#2f7d4f; font-weight:bold;">+2.2%</td></tr>
+<tr><td>2303</td><td>2026-06-02</td><td>2026-06-04</td><td>147.2</td><td>123.0</td><td>🔴 停損</td><td>2天</td><td style="color:#b4452f; font-weight:bold;">-17.0%</td></tr>
+<tr><td>6116</td><td>2026-05-28</td><td>2026-06-04</td><td>14.7</td><td>20.7</td><td>🟡 移動停利</td><td>5天</td><td style="color:#2f7d4f; font-weight:bold;">+39.9%</td></tr>
+<tr><td>2327</td><td>2026-05-18</td><td>2026-06-04</td><td>472.1</td><td>769.5</td><td>🟡 移動停利</td><td>13天</td><td style="color:#2f7d4f; font-weight:bold;">+61.9%</td></tr>
+<tr><td>6415</td><td>2026-05-28</td><td>2026-06-02</td><td>667.7</td><td>570.1</td><td>🔴 停損</td><td>3天</td><td style="color:#b4452f; font-weight:bold;">-15.2%</td></tr>
+<tr><td>6239</td><td>2026-05-18</td><td>2026-06-02</td><td>245.8</td><td>353.9</td><td>🟡 移動停利</td><td>11天</td><td style="color:#2f7d4f; font-weight:bold;">+43.0%</td></tr>
 
         </tbody>
     </table>
@@ -522,42 +610,42 @@
     <table style="max-width:400px">
         <thead><tr><th>月份</th><th>月報酬</th></tr></thead>
         <tbody>
-<tr style="background:rgba(0,255,0,0.30)"><td>2023-07</td><td style="color:#00ff00; font-weight:bold">+17.9%</td></tr>
-<tr style="background:rgba(255,68,68,0.28)"><td>2023-08</td><td style="color:#ff4444; font-weight:bold">-9.4%</td></tr>
-<tr style="background:rgba(255,68,68,0.06)"><td>2023-09</td><td style="color:#ff4444; font-weight:bold">-2.1%</td></tr>
-<tr style="background:rgba(255,68,68,0.13)"><td>2023-10</td><td style="color:#ff4444; font-weight:bold">-4.3%</td></tr>
-<tr style="background:rgba(0,255,0,0.06)"><td>2023-11</td><td style="color:#00ff00; font-weight:bold">+1.9%</td></tr>
-<tr style="background:rgba(0,255,0,0.08)"><td>2023-12</td><td style="color:#00ff00; font-weight:bold">+2.7%</td></tr>
-<tr style="background:rgba(255,68,68,0.05)"><td>2024-01</td><td style="color:#ff4444; font-weight:bold">-1.8%</td></tr>
-<tr style="background:rgba(0,255,0,0.10)"><td>2024-02</td><td style="color:#00ff00; font-weight:bold">+3.3%</td></tr>
-<tr style="background:rgba(255,68,68,0.10)"><td>2024-03</td><td style="color:#ff4444; font-weight:bold">-3.4%</td></tr>
-<tr style="background:rgba(255,68,68,0.15)"><td>2024-04</td><td style="color:#ff4444; font-weight:bold">-4.9%</td></tr>
-<tr style="background:rgba(255,68,68,0.01)"><td>2024-05</td><td style="color:#ff4444; font-weight:bold">-0.2%</td></tr>
-<tr style="background:rgba(0,255,0,0.01)"><td>2024-06</td><td style="color:#00ff00; font-weight:bold">+0.2%</td></tr>
-<tr style="background:rgba(255,68,68,0.22)"><td>2024-07</td><td style="color:#ff4444; font-weight:bold">-7.3%</td></tr>
-<tr style="background:rgba(255,68,68,0.08)"><td>2024-08</td><td style="color:#ff4444; font-weight:bold">-2.6%</td></tr>
-<tr style="background:rgba(255,68,68,0.16)"><td>2024-09</td><td style="color:#ff4444; font-weight:bold">-5.5%</td></tr>
-<tr style="background:rgba(255,68,68,0.08)"><td>2024-10</td><td style="color:#ff4444; font-weight:bold">-2.6%</td></tr>
-<tr style="background:rgba(255,68,68,0.12)"><td>2024-11</td><td style="color:#ff4444; font-weight:bold">-4.1%</td></tr>
-<tr style="background:rgba(0,255,0,0.09)"><td>2024-12</td><td style="color:#00ff00; font-weight:bold">+2.9%</td></tr>
-<tr style="background:rgba(255,68,68,0.14)"><td>2025-01</td><td style="color:#ff4444; font-weight:bold">-4.7%</td></tr>
-<tr style="background:rgba(255,68,68,0.09)"><td>2025-02</td><td style="color:#ff4444; font-weight:bold">-3.0%</td></tr>
-<tr style="background:rgba(255,68,68,0.06)"><td>2025-03</td><td style="color:#ff4444; font-weight:bold">-1.9%</td></tr>
-<tr style="background:rgba(255,68,68,0.02)"><td>2025-04</td><td style="color:#ff4444; font-weight:bold">-0.8%</td></tr>
-<tr style="background:rgba(0,255,0,0.08)"><td>2025-05</td><td style="color:#00ff00; font-weight:bold">+2.6%</td></tr>
-<tr style="background:rgba(255,68,68,0.01)"><td>2025-06</td><td style="color:#ff4444; font-weight:bold">-0.2%</td></tr>
-<tr style="background:rgba(0,255,0,0.30)"><td>2025-07</td><td style="color:#00ff00; font-weight:bold">+12.2%</td></tr>
-<tr style="background:rgba(0,255,0,0.30)"><td>2025-08</td><td style="color:#00ff00; font-weight:bold">+12.6%</td></tr>
-<tr style="background:rgba(255,68,68,0.17)"><td>2025-09</td><td style="color:#ff4444; font-weight:bold">-5.5%</td></tr>
-<tr style="background:rgba(0,255,0,0.30)"><td>2025-10</td><td style="color:#00ff00; font-weight:bold">+19.8%</td></tr>
-<tr style="background:rgba(255,68,68,0.22)"><td>2025-11</td><td style="color:#ff4444; font-weight:bold">-7.4%</td></tr>
-<tr style="background:rgba(0,255,0,0.04)"><td>2025-12</td><td style="color:#00ff00; font-weight:bold">+1.4%</td></tr>
-<tr style="background:rgba(0,255,0,0.30)"><td>2026-01</td><td style="color:#00ff00; font-weight:bold">+12.8%</td></tr>
-<tr style="background:rgba(255,68,68,0.03)"><td>2026-02</td><td style="color:#ff4444; font-weight:bold">-0.9%</td></tr>
-<tr style="background:rgba(255,68,68,0.30)"><td>2026-03</td><td style="color:#ff4444; font-weight:bold">-14.5%</td></tr>
-<tr style="background:rgba(0,255,0,0.30)"><td>2026-04</td><td style="color:#00ff00; font-weight:bold">+13.9%</td></tr>
-<tr style="background:rgba(0,255,0,0.30)"><td>2026-05</td><td style="color:#00ff00; font-weight:bold">+25.2%</td></tr>
-<tr style="background:rgba(255,68,68,0.05)"><td>2026-06</td><td style="color:#ff4444; font-weight:bold">-1.8%</td></tr>
+<tr style="background:rgba(47,125,79,0.30)"><td>2023-07</td><td style="color:#2f7d4f; font-weight:bold">+17.9%</td></tr>
+<tr style="background:rgba(180,69,47,0.28)"><td>2023-08</td><td style="color:#b4452f; font-weight:bold">-9.4%</td></tr>
+<tr style="background:rgba(180,69,47,0.06)"><td>2023-09</td><td style="color:#b4452f; font-weight:bold">-2.1%</td></tr>
+<tr style="background:rgba(180,69,47,0.13)"><td>2023-10</td><td style="color:#b4452f; font-weight:bold">-4.3%</td></tr>
+<tr style="background:rgba(47,125,79,0.06)"><td>2023-11</td><td style="color:#2f7d4f; font-weight:bold">+1.9%</td></tr>
+<tr style="background:rgba(47,125,79,0.08)"><td>2023-12</td><td style="color:#2f7d4f; font-weight:bold">+2.7%</td></tr>
+<tr style="background:rgba(180,69,47,0.05)"><td>2024-01</td><td style="color:#b4452f; font-weight:bold">-1.8%</td></tr>
+<tr style="background:rgba(47,125,79,0.10)"><td>2024-02</td><td style="color:#2f7d4f; font-weight:bold">+3.3%</td></tr>
+<tr style="background:rgba(180,69,47,0.10)"><td>2024-03</td><td style="color:#b4452f; font-weight:bold">-3.4%</td></tr>
+<tr style="background:rgba(180,69,47,0.15)"><td>2024-04</td><td style="color:#b4452f; font-weight:bold">-4.9%</td></tr>
+<tr style="background:rgba(180,69,47,0.01)"><td>2024-05</td><td style="color:#b4452f; font-weight:bold">-0.2%</td></tr>
+<tr style="background:rgba(47,125,79,0.01)"><td>2024-06</td><td style="color:#2f7d4f; font-weight:bold">+0.2%</td></tr>
+<tr style="background:rgba(180,69,47,0.22)"><td>2024-07</td><td style="color:#b4452f; font-weight:bold">-7.3%</td></tr>
+<tr style="background:rgba(180,69,47,0.08)"><td>2024-08</td><td style="color:#b4452f; font-weight:bold">-2.6%</td></tr>
+<tr style="background:rgba(180,69,47,0.16)"><td>2024-09</td><td style="color:#b4452f; font-weight:bold">-5.5%</td></tr>
+<tr style="background:rgba(180,69,47,0.08)"><td>2024-10</td><td style="color:#b4452f; font-weight:bold">-2.6%</td></tr>
+<tr style="background:rgba(180,69,47,0.12)"><td>2024-11</td><td style="color:#b4452f; font-weight:bold">-4.1%</td></tr>
+<tr style="background:rgba(47,125,79,0.09)"><td>2024-12</td><td style="color:#2f7d4f; font-weight:bold">+2.9%</td></tr>
+<tr style="background:rgba(180,69,47,0.14)"><td>2025-01</td><td style="color:#b4452f; font-weight:bold">-4.7%</td></tr>
+<tr style="background:rgba(180,69,47,0.09)"><td>2025-02</td><td style="color:#b4452f; font-weight:bold">-3.0%</td></tr>
+<tr style="background:rgba(180,69,47,0.06)"><td>2025-03</td><td style="color:#b4452f; font-weight:bold">-1.9%</td></tr>
+<tr style="background:rgba(180,69,47,0.02)"><td>2025-04</td><td style="color:#b4452f; font-weight:bold">-0.8%</td></tr>
+<tr style="background:rgba(47,125,79,0.08)"><td>2025-05</td><td style="color:#2f7d4f; font-weight:bold">+2.6%</td></tr>
+<tr style="background:rgba(180,69,47,0.01)"><td>2025-06</td><td style="color:#b4452f; font-weight:bold">-0.2%</td></tr>
+<tr style="background:rgba(47,125,79,0.30)"><td>2025-07</td><td style="color:#2f7d4f; font-weight:bold">+12.2%</td></tr>
+<tr style="background:rgba(47,125,79,0.30)"><td>2025-08</td><td style="color:#2f7d4f; font-weight:bold">+12.6%</td></tr>
+<tr style="background:rgba(180,69,47,0.17)"><td>2025-09</td><td style="color:#b4452f; font-weight:bold">-5.5%</td></tr>
+<tr style="background:rgba(47,125,79,0.30)"><td>2025-10</td><td style="color:#2f7d4f; font-weight:bold">+19.8%</td></tr>
+<tr style="background:rgba(180,69,47,0.22)"><td>2025-11</td><td style="color:#b4452f; font-weight:bold">-7.4%</td></tr>
+<tr style="background:rgba(47,125,79,0.04)"><td>2025-12</td><td style="color:#2f7d4f; font-weight:bold">+1.4%</td></tr>
+<tr style="background:rgba(47,125,79,0.30)"><td>2026-01</td><td style="color:#2f7d4f; font-weight:bold">+12.8%</td></tr>
+<tr style="background:rgba(180,69,47,0.03)"><td>2026-02</td><td style="color:#b4452f; font-weight:bold">-0.9%</td></tr>
+<tr style="background:rgba(180,69,47,0.30)"><td>2026-03</td><td style="color:#b4452f; font-weight:bold">-14.5%</td></tr>
+<tr style="background:rgba(47,125,79,0.30)"><td>2026-04</td><td style="color:#2f7d4f; font-weight:bold">+13.9%</td></tr>
+<tr style="background:rgba(47,125,79,0.30)"><td>2026-05</td><td style="color:#2f7d4f; font-weight:bold">+25.2%</td></tr>
+<tr style="background:rgba(180,69,47,0.05)"><td>2026-06</td><td style="color:#b4452f; font-weight:bold">-1.8%</td></tr>
 
         </tbody>
     </table>
