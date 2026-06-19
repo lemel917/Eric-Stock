@@ -1,0 +1,10 @@
+# Minimal lint gate. We intentionally check only correctness-critical rules
+# (syntax errors + undefined names) rather than style, so the gate flags real
+# bugs without requiring a full cleanup of the existing codebase.
+target-version = "py313"
+
+[lint]
+select = ["E9", "F63", "F7", "F82"]
+
+[lint.per-file-ignores]
+"tests/*" = ["F811"]

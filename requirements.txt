@@ -1,5 +1,13 @@
-yfinance
-pandas
-numpy
-matplotlib
-exchange_calendars
+# Runtime dependencies — version-pinned to major ranges.
+#
+# Why pinned: previously unpinned (numpy/pandas/etc.), so `pip install` in CI
+# pulled whatever was latest. A breaking major (numpy 2->3, pandas 2->3) could
+# silently break the scheduled report or change backtest results, with no way to
+# reproduce a past run. Upper bounds lock the major version; patch/minor float.
+#
+# To regenerate an exact lock after testing locally:  pip freeze > requirements.lock
+yfinance>=0.2.40,<0.3
+pandas>=2.0,<3.0
+numpy>=1.26,<3.0
+matplotlib>=3.7,<4.0
+exchange_calendars>=4.5,<5.0

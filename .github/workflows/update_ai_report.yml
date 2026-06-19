@@ -6,6 +6,10 @@ on:
     - cron: '0 9 * * 1-5'
     # 每月 1 日 UTC 10:00 跑月報
     - cron: '0 10 1 * *'
+  # 程式碼變動時跑測試閘門（push/PR）
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
     inputs:
       tp_atr:
@@ -39,7 +43,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # 測試閘門：所有事件都先跑，報表 job 透過 needs 依賴它
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies (runtime + dev)
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Lint (critical errors only)
+        run: ruff check .
+
+      - name: Look-ahead bias static check
+        run: python verify_strategy.py
+
+      - name: Unit tests
+        run: pytest
+
   generate-report:
+    needs: test
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -88,20 +117,31 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config --global user.email "godyc817@gmail.com"
-          git config --global user.name "Eric-YC"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
 
-          git add -A
+          # 只 stage 已知產出檔（白名單），避免 git add -A 把暫存/中繼檔推進 main
+          for f in stock_report.html paper_trading.html paper_equity.json \
+                   paper_signals.json paper_trades.json backtest_chart.png; do
+            [ -e "$f" ] && git add "$f"
+          done
+          [ -d artifacts ] && git add artifacts/
           git commit -m "📊 AI Report v8.5 + Paper Trading ($(date -u '+%Y-%m-%d'))" || echo "No changes"
 
-          # Rebase onto latest remote to prevent non-fast-forward rejection
-          git fetch origin main
-          git rebase origin/main
-
-          git push origin HEAD:main
+          # 安全 rebase + push：衝突則 abort 後重試，避免卡在衝突狀態靜默失敗
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main; then
+              if git push origin HEAD:main; then echo "✅ pushed"; break; fi
+            else
+              echo "⚠️ rebase 衝突，abort 後重試 ($attempt/3)"; git rebase --abort || true
+            fi
+            sleep 5
+          done
 
   # 每季第一週自動跑 sweep + Monte Carlo + Walk-Forward
   quarterly-health-check:
+    needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
 
@@ -145,14 +185,21 @@ jobs:
       - name: Upload quarterly report
         if: steps.check.outputs.run == 'true'
         run: |
-          git config --global user.email "godyc817@gmail.com"
-          git config --global user.name "Eric-YC"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
 
-          git add -A
+          # 只 stage 結果檔（csv/png/md + artifacts），避免推入無關變動
+          git add '*.csv' '*.png' '*.md' 2>/dev/null || true
+          [ -d artifacts ] && git add artifacts/
           git commit -m "🔄 Quarterly health check ($(date -u '+%Y-%m-%d'))" || echo "No changes"
 
-          # Rebase onto latest remote to prevent non-fast-forward rejection
-          git fetch origin main
-          git rebase origin/main
-
-          git push origin HEAD:main
+          # 安全 rebase + push：衝突則 abort 後重試，避免卡在衝突狀態靜默失敗
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase origin/main; then
+              if git push origin HEAD:main; then echo "✅ pushed"; break; fi
+            else
+              echo "⚠️ rebase 衝突，abort 後重試 ($attempt/3)"; git rebase --abort || true
+            fi
+            sleep 5
+          done

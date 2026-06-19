@@ -243,6 +243,24 @@ def _build_inst_section():
 
 
 
+def compute_display_atr(close_s, high_s=None, low_s=None, period=20):
+    """計算單檔股票最後一筆 ATR，對齊 EventDrivenBacktester._compute_atr。
+
+    純函式（僅依賴傳入的 Series），自 generate_report 內的巢狀函式抽出至模組層級，
+    以利重用與單元測試。
+    """
+    if high_s is not None and low_s is not None:
+        prev_close = close_s.shift(1)
+        tr1 = high_s - low_s
+        tr2 = (high_s - prev_close).abs()
+        tr3 = (low_s - prev_close).abs()
+        tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+    else:
+        # fallback: 用收盤價百分比變動
+        tr = close_s.pct_change().abs() * close_s
+    return tr.rolling(period).mean().iloc[-1]
+
+
 def generate_report(trades_df, equity_df, total_score, close_df, config,
                     metrics, benchmark_equity=None, ew_equity=None,
                     benchmark2_equity=None,
@@ -277,19 +295,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
 
     total_ret = metrics['total_return'] * 100
 
-    # === 計算精確 ATR（與回測引擎同公式） ===
-    def _compute_display_atr(close_s, high_s=None, low_s=None, period=20):
-        """計算單檔股票的 ATR，對齊 EventDrivenBacktester._compute_atr"""
-        if high_s is not None and low_s is not None:
-            prev_close = close_s.shift(1)
-            tr1 = high_s - low_s
-            tr2 = (high_s - prev_close).abs()
-            tr3 = (low_s - prev_close).abs()
-            tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-        else:
-            # fallback: 用收盤價百分比變動
-            tr = close_s.pct_change().abs() * close_s
-        return tr.rolling(period).mean().iloc[-1]
+    # ATR 顯示計算已抽出為模組層級的 compute_display_atr()
 
     # === 繪製資金曲線（含 Benchmark） ===
     plt.style.use('dark_background')
@@ -418,7 +424,7 @@ def generate_report(trades_df, equity_df, total_score, close_df, config,
         if tp_sl_mode == 'atr':
             high_s = high_df[ticker] if (high_df is not None and ticker in high_df.columns) else None
             low_s = low_df[ticker] if (low_df is not None and ticker in low_df.columns) else None
-            atr_val = _compute_display_atr(close_df[ticker], high_s, low_s)
+            atr_val = compute_display_atr(close_df[ticker], high_s, low_s)
 
             if not pd.isna(atr_val) and atr_val > 0:
                 tp_price = price + atr_val * config.get('tp_atr_mult', 3.0)

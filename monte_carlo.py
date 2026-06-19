@@ -200,7 +200,15 @@ def main():
                         help='Block bootstrap 區塊大小-天 (預設 20 ≈ 1 個月)')
     parser.add_argument('--legacy', action='store_true',
                         help='也跑 legacy 單筆 bootstrap 做對比')
+    parser.add_argument('--seed', type=int, default=42,
+                        help='隨機種子 (預設 42)，確保結果可重現；傳 -1 表示不固定')
     args = parser.parse_args()
+
+    # 固定隨機種子，讓 bootstrap 結果可重現（CI 每季比較需要可重現性）
+    if args.seed is not None and args.seed >= 0:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
+        print(f"   🎲 隨機種子: {args.seed} (結果可重現)")
 
     # === Equity-Curve Bootstrap ===
     equity = get_equity_curve()

@@ -22,8 +22,12 @@ v2 改進：
 - 與策略完全解耦：只需給它「分數矩陣 + OHLC 矩陣」就能運行
 """
 
+import logging
+
 import pandas as pd
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 class EventDrivenBacktester:
@@ -349,6 +353,27 @@ class EventDrivenBacktester:
         cl_pause_counter = 0     # 連損卡剩餘暫停天數
         regime_below_count = 0   # 大盤連續低於 60MA 的天數
 
+        # === 效能：預轉 numpy 陣列 + 欄位索引表 ===
+        # 主迴圈每日對每檔持倉做純量 .iloc[i] 索引，pandas label lookup 開銷大。
+        # 預轉 ndarray 後改用整數索引 arr[i, j]，數值與 df[ticker].iloc[i] 完全等價
+        # （同為 float64），不改變回測結果，僅消除 per-access 的 label 查找成本。
+        close_arr = close_df.to_numpy()
+        high_arr = high_df.to_numpy()
+        low_arr = low_df.to_numpy()
+        score_arr = total_score.to_numpy()
+        ma_arr = ma_60.to_numpy()
+        open_arr = open_df.to_numpy()
+        atr_arr = atr.to_numpy() if atr is not None else None
+        # 各矩陣欄位順序可能不同，故各自建立 ticker -> 整數欄位索引表
+        col_idx = {c: j for j, c in enumerate(close_df.columns)}
+        high_col_idx = {c: j for j, c in enumerate(high_df.columns)}
+        low_col_idx = {c: j for j, c in enumerate(low_df.columns)}
+        score_col_idx = {c: j for j, c in enumerate(total_score.columns)}
+        ma_col_idx = {c: j for j, c in enumerate(ma_60.columns)}
+        open_col_idx = {c: j for j, c in enumerate(open_df.columns)}
+        atr_col_idx = ({c: j for j, c in enumerate(atr.columns)}
+                       if atr is not None else None)
+
         # 從第 60 天開始（確保技術指標已穩定）
         for i in range(60, len(dates)):
             date = dates[i]
@@ -358,34 +383,31 @@ class EventDrivenBacktester:
             for ticker, trade in active_trades.items():
                 trade['days_held'] += 1
 
-                current_high = high_df[ticker].iloc[i]
-                current_low = low_df[ticker].iloc[i]
-                current_close = close_df[ticker].iloc[i]
+                current_high = high_arr[i, high_col_idx[ticker]]
+                current_low = low_arr[i, low_col_idx[ticker]]
+                current_close = close_arr[i, col_idx[ticker]]
 
                 if pd.isna(current_close):
                     continue
 
-                # 更新移動停利追蹤價（每日盤中最高價）
-                if not pd.isna(current_high):
-                    trade['highest_since_entry'] = max(
-                        trade['highest_since_entry'], current_high
-                    )
+                # ── Trailing / Breakeven 停損調整（用「截至昨日」的最高價）──
+                # FIX(intrabar bias): 不可先用今日 high 抬高 trailing 停損、再用今日 low
+                # 判觸發——那等於假設同一根 K 棒「先創高後回落」，會系統性高估出場價。
+                # 今日 high 在出場判定「之後」才併入 highest_since_entry（見下方 else）。
+                if self.trailing_stop and trade.get('atr_at_entry', 0) > 0:
+                    trailing_sl = (trade['highest_since_entry']
+                                   - trade['atr_at_entry'] * self.trailing_atr_mult)
+                    # trailing SL 只能往上調，不能往下
+                    trade['sl_price'] = max(trade['sl_price'], trailing_sl)
 
-                    # 動態調整 trailing stop level
-                    if self.trailing_stop and trade.get('atr_at_entry', 0) > 0:
-                        trailing_sl = (trade['highest_since_entry']
-                                       - trade['atr_at_entry'] * self.trailing_atr_mult)
-                        # trailing SL 只能往上調，不能往下
-                        trade['sl_price'] = max(trade['sl_price'], trailing_sl)
-
-                    # ── Breakeven Stop：獲利超過 breakeven_pct 後將 SL 移至成本價 ──
-                    if (self.breakeven_pct > 0
-                            and not trade.get('breakeven_activated', False)):
-                        unrealized = (current_high / trade['entry_price']) - 1
-                        if unrealized >= self.breakeven_pct:
-                            be_price = trade['entry_price']  # 成本價
-                            trade['sl_price'] = max(trade['sl_price'], be_price)
-                            trade['breakeven_activated'] = True
+                # ── Breakeven Stop：用截至昨日的未實現獲利（同樣避免 intrabar bias）──
+                if (self.breakeven_pct > 0
+                        and not trade.get('breakeven_activated', False)):
+                    unrealized = (trade['highest_since_entry'] / trade['entry_price']) - 1
+                    if unrealized >= self.breakeven_pct:
+                        be_price = trade['entry_price']  # 成本價
+                        trade['sl_price'] = max(trade['sl_price'], be_price)
+                        trade['breakeven_activated'] = True
 
                 exit_triggered = False
                 exit_price = 0
@@ -424,8 +446,8 @@ class EventDrivenBacktester:
                             exit_triggered = True
                             exit_price = current_close
                             exit_reason = "🟠 汰弱"
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("mid_hold_review 分數查詢失敗，略過汰弱判定: %s", e)
                 elif trade['days_held'] >= self.max_hold_days:
                     exit_triggered = True
                     exit_price = current_close
@@ -469,6 +491,12 @@ class EventDrivenBacktester:
                             consec_sl_count = 0
                     else:
                         consec_sl_count = 0
+                else:
+                    # FIX(intrabar bias): 出場判定後才用今日 high 更新追蹤高點，
+                    # 供「明日」的 trailing SL 計算使用（今日不可自我抬高停損）。
+                    if not pd.isna(current_high):
+                        trade['highest_since_entry'] = max(
+                            trade['highest_since_entry'], current_high)
 
             # 移除已出場的股票
             for t in exited_tickers:
@@ -541,8 +569,8 @@ class EventDrivenBacktester:
                                         ticker_history[ticker].append(profit_pct)
                                 for t in delev_tickers:
                                     del active_trades[t]
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning("Regime Deleverage 計算失敗，略過降曝險: %s", e)
 
             # ── Step 3: 處理今日進場（根據昨日收盤信號，今日 open 進場） ──
             entry_allowed = (dd_pause_counter <= 0 and cl_pause_counter <= 0)
@@ -580,8 +608,8 @@ class EventDrivenBacktester:
                                 else:
                                     # 傳統 binary：大盤 > 60MA 才進場
                                     regime_ok = mkt_val > mkt_ma60
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Regime filter 計算失敗，略過: %s", e)
 
                 # === Breadth-aware Regime：用 universe 內部狀態修正 regime ===
                 if self.breadth_regime and regime_ok and i >= 21 and self._ma20_all is not None:
@@ -599,8 +627,8 @@ class EventDrivenBacktester:
                             regime_scale = min(regime_scale, 0.3)
                         elif breadth_pct < 0.45:
                             regime_scale = min(regime_scale, 0.5)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Breadth regime 計算失敗，略過: %s", e)
 
                 # === Macro Regime：VIX 宏觀壓力調節 ===
                 if self.macro_regime and self._vix_series is not None and regime_ok:
@@ -615,8 +643,8 @@ class EventDrivenBacktester:
                                 regime_scale *= 0.5   # 高度緊張
                             elif vix_val > 22:
                                 regime_scale *= 0.7   # 警戒
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Macro/VIX regime 計算失敗，略過: %s", e)
 
                 candidates = []
                 if regime_ok:
@@ -632,10 +660,11 @@ class EventDrivenBacktester:
                                 if wr < self.blacklist_min_wr:
                                     continue
 
-                        score = total_score[ticker].iloc[i - 1] if i - 1 >= 0 else np.nan
-                        ma = ma_60[ticker].iloc[i - 1] if i - 1 >= 0 else np.nan
-                        prev_close = close_df[ticker].iloc[i - 1] if i - 1 >= 0 else np.nan
-                        entry_price = open_df[ticker].iloc[i]
+                        # i 從 60 起，i-1>=0 恆成立；整數索引值與 .iloc[i-1] 等價
+                        score = score_arr[i - 1, score_col_idx[ticker]]
+                        ma = ma_arr[i - 1, ma_col_idx[ticker]]
+                        prev_close = close_arr[i - 1, col_idx[ticker]]
+                        entry_price = open_arr[i, open_col_idx[ticker]]
 
                         if pd.isna(entry_price) or pd.isna(score) or pd.isna(ma):
                             continue
@@ -646,7 +675,7 @@ class EventDrivenBacktester:
                             continue
 
                         if self.gap_filter_atr > 0 and atr is not None:
-                            atr_val = atr[ticker].iloc[i - 1] if i - 1 >= 0 else np.nan
+                            atr_val = atr_arr[i - 1, atr_col_idx[ticker]]
                             if not pd.isna(atr_val) and atr_val > 0:
                                 gap = abs(entry_price - prev_close)
                                 # Dynamic gap filter: 強勢 regime 放寬到 2.0 ATR
@@ -712,8 +741,8 @@ class EventDrivenBacktester:
                                     capital += hedge_pnl
                                     hedge_pnl_total += hedge_pnl
                                     hedge_active = False
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Futures hedge 計算失敗，略過: %s", e)
 
                 # Top-K 選股：按分數排序，取前 top_k 名（含板塊分散）
                 candidates.sort(key=lambda x: x[1], reverse=True)
@@ -769,8 +798,8 @@ class EventDrivenBacktester:
                                 regime_scale = min(regime_scale, 0.4)
                             elif cand_breadth < 0.55:
                                 regime_scale = min(regime_scale, 0.6)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Candidate breadth 計算失敗，略過: %s", e)
 
                 # === Theme Breadth：前 15 名板塊集中度檢查 ===
                 if self.theme_breadth and len(candidates) >= 5:
@@ -784,8 +813,8 @@ class EventDrivenBacktester:
                             regime_scale = min(regime_scale, 0.6)
                         elif theme_ratio > 0.70:
                             regime_scale = min(regime_scale, 0.75)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Theme breadth 計算失敗，略過: %s", e)
 
                 effective_top_k = top_k
                 # Dynamic Top-K: 弱勢 regime 自動降低持股數
@@ -834,8 +863,8 @@ class EventDrivenBacktester:
                                     penalized.append((ticker, score, ep))
                                     already_in.add(ticker)
                                 candidates = sorted(penalized, key=lambda x: x[1], reverse=True)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Correlation/cluster filter 計算失敗，略過: %s", e)
 
                 # === Sector Flow Tilt：按板塊資金流分配 slot ===
                 if (self.sector_flow_tilt and self._sector_flow_df is not None
@@ -855,7 +884,8 @@ class EventDrivenBacktester:
                             )
                         else:
                             selected = candidates[:min(effective_top_k, slots_available)]
-                    except Exception:
+                    except Exception as e:
+                        logger.warning("Sector cap 選股失敗，回退至預設選股: %s", e)
                         selected = candidates[:min(effective_top_k, slots_available)]
                 else:
                     selected = candidates[:min(effective_top_k, slots_available)]
@@ -896,8 +926,8 @@ class EventDrivenBacktester:
                                     remaining = [c for c in candidates if c[0] not in
                                                  {s[0] for s in selected} and c[0] not in to_drop]
                                     selected += remaining[:min(top_k, slots_available) - len(selected)]
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Sector cap 補位失敗，略過: %s", e)
 
                 for rank_idx, (ticker, score, entry_price) in enumerate(selected):
                     # === Portfolio Heat Cap: 進場前檢查組合總風險 ===
@@ -951,8 +981,8 @@ class EventDrivenBacktester:
                                 if not pd.isna(recent_vol) and recent_vol > 0:
                                     vol_scalar = min(2.0, max(0.3, target_vol / recent_vol))
                                     effective_pos_size = effective_pos_size * vol_scalar
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            logger.warning("Dynamic risk sizing 計算失敗，略過: %s", e)
 
                     # Volatility Parity 或 固定/動態比例 sizing
                     if self.vol_parity and atr is not None:
@@ -975,7 +1005,7 @@ class EventDrivenBacktester:
 
                         # 計算 TP/SL 價格（基於實際進場價含滑價）
                         if self.tp_sl_mode == 'atr' and atr is not None:
-                            atr_val = atr[ticker].iloc[i - 1] if i - 1 >= 0 else np.nan
+                            atr_val = atr_arr[i - 1, atr_col_idx[ticker]]
                             if pd.isna(atr_val) or atr_val <= 0:
                                 # fallback 到固定百分比
                                 tp_price = actual_entry * (1 + self.tp_pct)
@@ -1006,7 +1036,7 @@ class EventDrivenBacktester:
             # ── Step 4: 結算今日總權益（現金 + 所有持倉市值） ──
             today_equity = capital
             for ticker, trade in active_trades.items():
-                close_val = close_df[ticker].iloc[i]
+                close_val = close_arr[i, col_idx[ticker]]
                 if not pd.isna(close_val):
                     today_equity += trade['shares'] * close_val
 
