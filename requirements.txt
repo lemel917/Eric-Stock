@@ -9,5 +9,6 @@
 yfinance>=0.2.40,<0.3
 pandas>=2.0,<3.0
 numpy>=1.26,<3.0
+scipy>=1.11,<2.0  # strategy/factor_eval.py 用 Spearman IC，pandas .corr(method='spearman') 需要 scipy
 matplotlib>=3.7,<4.0
 exchange_calendars>=4.5,<5.0
