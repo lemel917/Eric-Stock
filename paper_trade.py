@@ -33,6 +33,8 @@ import sys
 from datetime import datetime, date
 import argparse
 
+import paper_common
+
 
 TRADE_LOG = 'paper_trades.json'
 SIGNAL_LOG = 'paper_signals.json'
@@ -79,23 +81,15 @@ def generate_signals(args):
         print("⚠️ stock_report.html 不存在，請先執行 python ai_report.py")
         return
 
-    with open(report_path) as f:
-        html = f.read()
-
-    # 從 HTML 擷取「今日執行計畫」區塊
-    # 搜尋交易計畫表格中的股票
-    pattern = r'<td>(\d{4})</td>\s*<td[^>]*>[^<]*</td>\s*<td[^>]*>([\d\.]+)</td>\s*<td[^>]*>([\d\.]+)</td>\s*<td[^>]*>([\d\.]+)</td>'
-    matches = re.findall(pattern, html)
-
-    if not matches:
-        # 嘗試另一種格式
-        pattern = r'買入\s+(\d{4})\s'
-        tickers = re.findall(pattern, html)
-        if tickers:
-            print(f"📋 今日信號股票: {', '.join(tickers)}")
-        else:
-            print("📋 今日無信號（可能為非交易日或 regime filter 阻擋）")
+    # FIX(4fv): 改用 paper_common 的單一信號解析器。原本的位置式 regex 在當前
+    # stock_report.html 格式下無法匹配（等於長期靜默失敗），與 paper_tracker 不同步。
+    signals_parsed = paper_common.extract_signals_from_report(report_path)
+    if not signals_parsed:
+        print("📋 今日無信號（可能為非交易日或 regime filter 阻擋）")
         return
+    # 轉回 (ticker, entry, tp, sl) 字串元組，維持下游格式化邏輯不變
+    matches = [(s['ticker'], f"{s['entry']:.1f}", f"{s['tp']:.1f}", f"{s['sl']:.1f}")
+               for s in signals_parsed]
 
     today = date.today().isoformat()
     signals = load_json(SIGNAL_LOG)

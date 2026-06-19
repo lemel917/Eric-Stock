@@ -36,7 +36,9 @@ import numpy as np
 # 確保 strategy/ 可被 import
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from strategy.ai_strategy import fetch_panel_data, engineer_features, build_liquid_universe
+from strategy.ai_strategy import (
+    fetch_panel_data, engineer_features, build_liquid_universe, load_delist_dates,
+)
 from strategy.event_backtest import EventDrivenBacktester
 from strategy.risk_metrics import compute_risk_metrics, format_metrics_summary
 from strategy.benchmark import fetch_benchmark, equal_weight_benchmark, compute_excess_return
@@ -1623,8 +1625,13 @@ def main():
     )
 
     # Phase 2: 動態 Universe 或靜態池
+    # FIX(vmn): 載入下市日，於回測 universe 中 point-in-time 排除已下市標的
+    _delist_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                'delisted_tickers.csv')
+    delist_dates = load_delist_dates(_delist_path)
     if use_dynamic:
-        universe_mask = build_liquid_universe(close_df, vol_df, top_n=args.universe_size)
+        universe_mask = build_liquid_universe(
+            close_df, vol_df, top_n=args.universe_size, delist_dates=delist_dates)
     else:
         universe_mask = None
 
