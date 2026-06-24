@@ -9,8 +9,8 @@
       "sl": 73.3,
       "entry_date": "2026-06-08",
       "shares": 175.0,
-      "day_count": 13,
-      "current_price": 94.0999984741211
+      "day_count": 14,
+      "current_price": 102.0
     },
     "6116": {
       "entry": 16.6,
@@ -18,8 +18,8 @@
       "sl": 13.3,
       "entry_date": "2026-06-08",
       "shares": 822.0,
-      "day_count": 13,
-      "current_price": 19.0
+      "day_count": 14,
+      "current_price": 19.399999618530273
     },
     "2344": {
       "entry": 218.5,
@@ -27,8 +27,8 @@
       "sl": 182.6,
       "entry_date": "2026-06-18",
       "shares": 64.0,
-      "day_count": 5,
-      "current_price": 211.5
+      "day_count": 6,
+      "current_price": 205.0
     },
     "2327": {
       "entry": 1080.0,
@@ -36,8 +36,8 @@
       "sl": 893.0,
       "entry_date": "2026-06-18",
       "shares": 12.0,
-      "day_count": 5,
-      "current_price": 1020.0
+      "day_count": 6,
+      "current_price": 1050.0
     },
     "6669": {
       "entry": 4855.0,
@@ -45,8 +45,8 @@
       "sl": 4191.4,
       "entry_date": "2026-06-22",
       "shares": 3.0,
-      "day_count": 1,
-      "current_price": 4675.0
+      "day_count": 2,
+      "current_price": 4605.0
     },
     "1303": {
       "entry": 154.5,
@@ -54,7 +54,8 @@
       "sl": 131.7,
       "entry_date": "2026-06-23",
       "shares": 91.0,
-      "day_count": 0
+      "day_count": 1,
+      "current_price": 156.0
     }
   },
   "closed_trades": [
@@ -318,6 +319,13 @@
     {
       "date": "2026-06-23",
       "equity": 212389.0,
+      "capital": 126443.0,
+      "n_positions": 6,
+      "n_closed_today": 0
+    },
+    {
+      "date": "2026-06-24",
+      "equity": 213971.0,
       "capital": 126443.0,
       "n_positions": 6,
       "n_closed_today": 0
@@ -586,6 +594,18 @@
         "2408",
         "2379",
         "6116"
+      ]
+    },
+    {
+      "date": "2026-06-24",
+      "tickers": [
+        "1303",
+        "2327",
+        "3481",
+        "2408",
+        "2344",
+        "6116",
+        "2303"
       ]
     }
   ]
