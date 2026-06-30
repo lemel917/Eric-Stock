@@ -33,6 +33,31 @@ def test_total_and_annual_return():
     assert m["ann_return"] == pytest.approx(1.0, rel=0.05)
 
 
+def test_sharpe_is_arithmetic_daily_return_sharpe():
+    # Equity path with genuine variance so geometric != arithmetic Sharpe.
+    vals = [1_000_000, 1_010_000, 1_004_950, 1_017_010, 1_013_960,
+            1_022_070, 1_015_940, 1_028_130, 1_023_000, 1_035_330]
+    eq = _equity(vals)
+    m = compute_risk_metrics(eq, pd.DataFrame(), initial_capital=1_000_000)
+
+    dr = eq["Equity"].pct_change().dropna()
+    expected = dr.mean() / dr.std() * np.sqrt(252)
+    # Primary Sharpe must be the arithmetic daily-return Sharpe (上游一致口徑).
+    assert m["sharpe"] == pytest.approx(expected)
+    # Geometric Sharpe kept as a reference field and genuinely differs here.
+    assert "geometric_sharpe" in m
+    assert m["sharpe"] != pytest.approx(m["geometric_sharpe"])
+
+
+def test_sharpe_respects_risk_free_rate():
+    vals = [1_000_000, 1_010_000, 1_004_950, 1_017_010, 1_013_960, 1_022_070]
+    eq = _equity(vals)
+    m0 = compute_risk_metrics(eq, pd.DataFrame(), risk_free_rate=0.0)
+    m_rf = compute_risk_metrics(eq, pd.DataFrame(), risk_free_rate=0.02)
+    # A positive risk-free rate lowers the excess-return Sharpe.
+    assert m_rf["sharpe"] < m0["sharpe"]
+
+
 def test_max_drawdown_is_negative_and_uses_cummax():
     # Up to 1.2M, down to 0.9M (peak-to-trough = 0.9/1.2 - 1 = -25%), recover.
     vals = [1_000_000, 1_200_000, 900_000, 1_100_000]

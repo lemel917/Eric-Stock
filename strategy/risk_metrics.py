@@ -47,7 +47,17 @@ def compute_risk_metrics(equity_df, trades_df, initial_capital=1_000_000, risk_f
     ann_volatility = daily_returns.std() * np.sqrt(trading_days_per_year)
 
     # === Sharpe Ratio ===
-    sharpe = (ann_return - risk_free_rate) / ann_volatility if ann_volatility > 0 else 0
+    # 主 Sharpe 採「Arithmetic 日報酬 Sharpe」(與上游 tw_stocker 一致)：
+    # 用日超額報酬均值/日報酬標準差，再年化。避免幾何年化報酬/波動口徑
+    # 與報表其他處 rolling Sharpe (算術) 不一致。詳見 Stock-gzy。
+    daily_rf = (1 + risk_free_rate) ** (1 / trading_days_per_year) - 1
+    excess_daily_returns = daily_returns - daily_rf
+    sharpe = (excess_daily_returns.mean() / daily_returns.std()
+              * np.sqrt(trading_days_per_year)
+              if daily_returns.std() > 0 else 0)
+    # 幾何 Sharpe (ann_return/ann_vol) 保留作參考欄位。
+    geometric_sharpe = ((ann_return - risk_free_rate) / ann_volatility
+                        if ann_volatility > 0 else 0)
 
     # === Sortino Ratio (全樣本 downside deviation) ===
     downside = np.minimum(daily_returns - risk_free_rate / trading_days_per_year, 0)
@@ -112,6 +122,7 @@ def compute_risk_metrics(equity_df, trades_df, initial_capital=1_000_000, risk_f
 
         # 風險調整
         'sharpe': sharpe,
+        'geometric_sharpe': geometric_sharpe,
         'sortino': sortino,
         'calmar': calmar,
 
@@ -163,6 +174,7 @@ def format_metrics_summary(metrics):
         f"  年化報酬率:     {metrics['ann_return']*100:+.2f}%",
         f"  年化波動率:     {metrics['ann_volatility']*100:.2f}%",
         f"  Sharpe Ratio:   {metrics['sharpe']:.3f}",
+        f"  Geom. Sharpe:   {metrics['geometric_sharpe']:.3f}",
         f"  Sortino Ratio:  {metrics['sortino']:.3f}",
         f"  Calmar Ratio:   {metrics['calmar']:.3f}",
         f"  最大回撤:       {metrics['max_drawdown_pct']*100:.1f}%",

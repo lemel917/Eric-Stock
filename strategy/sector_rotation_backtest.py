@@ -118,6 +118,25 @@ class SectorRotationBacktester:
         active_trades = {}
         max_positions = int(1.0 / self.position_size)
 
+        def is_tradable_bar(ticker, idx):
+            """raw bar 能否真實成交：OHLC 有效(非 NaN、>0) 且當日有量。
+
+            FIX(tradability, Stock-go4): 配合 fetch_panel_data 的 volume fillna(0)
+            與價格 ffill(limit=5)——停牌/下市日留下 ffill 假價但 volume=0。
+            進出場成交前都先過此檢查，避免在零量假價 bar 上假成交。
+            """
+            for df in (open_df, high_df, low_df, close_df):
+                if ticker not in df.columns:
+                    return False
+                v = df[ticker].iloc[idx]
+                if pd.isna(v) or v <= 0:
+                    return False
+            if vol_df is not None and ticker in vol_df.columns:
+                vol = vol_df[ticker].iloc[idx]
+                if pd.isna(vol) or vol <= 0:
+                    return False
+            return True
+
         # 統計
         regime_stats = {'full': 0, 'reduced': 0, 'minimal': 0, 'stopped': 0}
         tech_gate_stats = {'open': 0, 'half': 0, 'closed': 0}
@@ -134,6 +153,10 @@ class SectorRotationBacktester:
                 current_low = low_df[ticker].iloc[i]
                 current_close = close_df[ticker].iloc[i]
                 current_open = open_df[ticker].iloc[i] if ticker in open_df.columns else np.nan
+
+                # 停牌/零量日不可成交 → 當日無法賣出，跳過出場判定（續抱至可交易日）
+                if not is_tradable_bar(ticker, i):
+                    continue
 
                 if pd.isna(current_close):
                     continue
@@ -413,6 +436,9 @@ class SectorRotationBacktester:
 
                 entry_price = open_df[ticker].iloc[i] if ticker in open_df.columns else close_df[ticker].iloc[i]
                 if pd.isna(entry_price) or entry_price <= 0:
+                    continue
+                # 進場日須為可成交 bar（有量、OHLC 有效），否則買不到
+                if not is_tradable_bar(ticker, i):
                     continue
 
                 # Gap filter

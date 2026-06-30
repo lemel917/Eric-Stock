@@ -23,6 +23,7 @@ from strategy.us_market import fetch_us_signals, align_us_to_tw
 from strategy.sector_rotation_backtest import SectorRotationBacktester
 from strategy.risk_metrics import compute_risk_metrics, format_metrics_summary
 from strategy.benchmark import fetch_benchmark
+from strategy.evaluation import slice_evaluation_window
 
 # 沿用 v8.5 的股池
 EXTENDED_TICKERS = None  # 會從 ai_report.py 導入
@@ -66,6 +67,9 @@ def parse_args():
                         help='回測天數 (預設 1200)')
     parser.add_argument('--start-date', type=str, default=None,
                         help='起始日期 (YYYY-MM-DD)')
+    parser.add_argument('--eval-start', type=str, default=None,
+                        help='績效統計起算日；回測仍從 --start-date 起跑以暖機，'
+                             '但報告指標只計 eval-start 之後並重基權益曲線（排除 warm-up 污染）')
     parser.add_argument('--end-date', type=str, default=None,
                         help='結束日期 (YYYY-MM-DD)')
     parser.add_argument('--top-sectors', type=int, default=3,
@@ -143,6 +147,17 @@ def main():
         close_df, open_df, high_df, low_df, vol_df,
         us_aligned, universe_mask,
     )
+
+    # eval-window 裁切：回測從 start-date 暖機，但報告只計 eval-start 之後並重基。
+    # slice 回傳 (equity, trades)，重綁後所有下游統計皆用評估窗資料。
+    equity_df, trades_df = slice_evaluation_window(
+        equity_df, trades_df,
+        eval_start=args.eval_start,
+        initial_capital=args.capital,
+    )
+    if args.eval_start:
+        print(f"\n📏 績效統計區間: {args.eval_start} → {args.end_date or '今天'} "
+              f"(warm-up 已排除)")
 
     # Phase 5: 風險指標
     if not trades_df.empty and not equity_df.empty:

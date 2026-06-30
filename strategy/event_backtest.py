@@ -374,6 +374,26 @@ class EventDrivenBacktester:
         atr_col_idx = ({c: j for j, c in enumerate(atr.columns)}
                        if atr is not None else None)
 
+        def is_tradable_bar(ticker, idx):
+            """raw bar 能否真實成交：OHLC 有效(非 NaN、>0) 且當日有量。
+
+            FIX(tradability, Stock-go4): 配合 fetch_panel_data 的 volume fillna(0)
+            與價格 ffill(limit=5)——停牌/下市日會留下 ffill 假價但 volume=0。
+            沒有此閘門時，回測可能在「零量假價」bar 上假成交（買進買不到的股、
+            或在跌停無量日假裝賣出）。進出場成交前都先過此檢查。
+            """
+            o = open_arr[idx, open_col_idx[ticker]] if ticker in open_col_idx else np.nan
+            h = high_arr[idx, high_col_idx[ticker]] if ticker in high_col_idx else np.nan
+            l = low_arr[idx, low_col_idx[ticker]] if ticker in low_col_idx else np.nan
+            c = close_arr[idx, col_idx[ticker]] if ticker in col_idx else np.nan
+            if any(pd.isna(v) or v <= 0 for v in (o, h, l, c)):
+                return False
+            if vol_df is not None and ticker in vol_df.columns:
+                vol = vol_df[ticker].iloc[idx]
+                if pd.isna(vol) or vol <= 0:
+                    return False
+            return True
+
         # 從第 60 天開始（確保技術指標已穩定）
         for i in range(60, len(dates)):
             date = dates[i]
@@ -388,6 +408,9 @@ class EventDrivenBacktester:
                 current_close = close_arr[i, col_idx[ticker]]
 
                 if pd.isna(current_close):
+                    continue
+                # 停牌/零量日不可成交 → 當日無法賣出，跳過出場判定（續抱至可交易日）
+                if not is_tradable_bar(ticker, i):
                     continue
 
                 # ── Trailing / Breakeven 停損調整（用「截至昨日」的最高價）──
@@ -670,6 +693,9 @@ class EventDrivenBacktester:
                             continue
                         if pd.isna(prev_close) or entry_price <= 0:
                             continue
+                        # 進場日須為可成交 bar（有量、OHLC 有效），否則買不到
+                        if not is_tradable_bar(ticker, i):
+                            continue
 
                         if not (score >= threshold and prev_close > ma):
                             continue
@@ -707,6 +733,9 @@ class EventDrivenBacktester:
                         entry_price = open_df[ticker].iloc[i]
                         prev_close = close_df[ticker].iloc[i - 1] if i - 1 >= 0 else np.nan
                         if pd.isna(entry_price) or pd.isna(prev_close) or entry_price <= 0:
+                            continue
+                        # 進場日須為可成交 bar（有量、OHLC 有效），否則買不到
+                        if not is_tradable_bar(ticker, i):
                             continue
 
                         ticker_rsi = rsi_14[ticker].iloc[i - 1] if i - 1 >= 0 else np.nan

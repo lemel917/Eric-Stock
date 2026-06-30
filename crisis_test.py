@@ -64,10 +64,15 @@ CRISIS_PERIODS = {
 }
 
 
-def run_backtest_range(start_date, end_date):
-    """Run ai_report.py with explicit date range and extract metrics."""
+def run_backtest_range(start_date, end_date, eval_start=None):
+    """Run ai_report.py with explicit date range and extract metrics.
+
+    start_date 為暖機起點，eval_start 為績效統計起點；傳入後報表只計 eval 窗。
+    """
     cmd = (f'python3 ai_report.py '
            f'--start-date {start_date} --end-date {end_date}')
+    if eval_start:
+        cmd += f' --eval-start {eval_start}'
     r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=300)
     out = r.stdout + r.stderr
 
@@ -118,7 +123,8 @@ def main():
         print(f"{'─'*70}")
 
         try:
-            metrics = run_backtest_range(info['fetch_start'], info['eval_end'])
+            metrics = run_backtest_range(info['fetch_start'], info['eval_end'],
+                                         eval_start=info['eval_start'])
 
             # Color indicators
             sh_icon = '✅' if metrics['sharpe'] >= 1.0 else ('⚠️' if metrics['sharpe'] >= 0 else '🔴')

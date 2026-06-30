@@ -41,6 +41,7 @@ from strategy.ai_strategy import (
 )
 from strategy.event_backtest import EventDrivenBacktester
 from strategy.risk_metrics import compute_risk_metrics, format_metrics_summary
+from strategy.evaluation import slice_evaluation_window
 from strategy.benchmark import fetch_benchmark, equal_weight_benchmark, compute_excess_return
 from strategy.institutional_flow import build_inst_flow_df, get_inst_flow_for_signals, fetch_inst_rankings
 from strategy.news_sentiment import get_news_sentiment_for_signals
@@ -1509,6 +1510,11 @@ def parse_args():
         '--end-date', type=str, default=None,
         help='明確指定回測結束日期 (YYYY-MM-DD，預設為今天)'
     )
+    parser.add_argument(
+        '--eval-start', type=str, default=None,
+        help='績效統計起算日；回測仍從 --start-date 起跑以暖機，但報告指標只計 '
+             'eval-start 之後並重基權益曲線（排除 warm-up 污染）'
+    )
 
     # 結構性功能
     parser.add_argument(
@@ -1831,6 +1837,17 @@ def main():
         vol_df=vol_df,
         universe_mask=universe_mask,
     )
+
+    # eval-window 裁切：回測從 start-date 暖機，但報告只計 eval-start 之後並重基。
+    # slice 回傳 (equity, trades)，重綁後所有下游統計/圖表皆用評估窗資料。
+    equity_df, trades_df = slice_evaluation_window(
+        equity_df, trades_df,
+        eval_start=args.eval_start,
+        initial_capital=args.capital,
+    )
+    if args.eval_start:
+        print(f"\n📏 績效統計區間: {args.eval_start} → {args.end_date or '今天'} "
+              f"(warm-up 已排除)")
 
     # Phase 5: 風險指標
     metrics = compute_risk_metrics(equity_df, trades_df, args.capital)

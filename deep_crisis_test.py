@@ -107,19 +107,27 @@ CRISIS_PERIODS = {
 }
 
 
-def run_sr_backtest(start_date, end_date):
-    """跑 Sector Rotation v2 回測。"""
+def run_sr_backtest(start_date, end_date, eval_start=None):
+    """跑 Sector Rotation v2 回測。
+
+    start_date 為暖機起點 (fetch_start)，eval_start 為績效統計起點；
+    傳入 --eval-start 後報表只計 eval 窗，排除 warm-up 污染。
+    """
     cmd = (f'python3 sector_rotation_report.py '
            f'--start-date {start_date} --end-date {end_date}')
+    if eval_start:
+        cmd += f' --eval-start {eval_start}'
     r = subprocess.run(cmd, shell=True, capture_output=True,
                        text=True, timeout=300)
     return _parse_output(r.stdout + r.stderr)
 
 
-def run_v85_backtest(start_date, end_date):
+def run_v85_backtest(start_date, end_date, eval_start=None):
     """跑 v8.5 momentum 回測。"""
     cmd = (f'python3 ai_report.py '
            f'--start-date {start_date} --end-date {end_date}')
+    if eval_start:
+        cmd += f' --eval-start {eval_start}'
     r = subprocess.run(cmd, shell=True, capture_output=True,
                        text=True, timeout=300)
     return _parse_output(r.stdout + r.stderr)
@@ -216,13 +224,13 @@ def main():
         eval_end = info['eval_end']
         fetch_start = info['fetch_start']
 
-        # SR v2
+        # SR v2 (fetch_start 暖機 → eval_start 起算績效)
         sys.stderr.write(f"  Running SR v2...\n")
-        sr_metrics = run_sr_backtest(fetch_start, eval_end)
+        sr_metrics = run_sr_backtest(fetch_start, eval_end, eval_start=eval_start)
 
         # v8.5
         sys.stderr.write(f"  Running v8.5...\n")
-        v85_metrics = run_v85_backtest(fetch_start, eval_end)
+        v85_metrics = run_v85_backtest(fetch_start, eval_end, eval_start=eval_start)
 
         # Benchmarks
         bm_0050 = get_benchmark_return('0050', eval_start, eval_end)
