@@ -1,6 +1,6 @@
-# TW Stocker v9.0 — AI 量化交易系統（雙策略架構）
+# TW Stocker v9.0 — AI 量化交易系統（多策略架構）
 
-中期動量 + 板塊輪動的雙策略系統。v8.5 個股動量穩健底倉 + Sector Rotation v2 板塊資金流追蹤。
+中期動量 + 板塊輪動 + 早盤餐費的多策略系統。v8.5 個股動量穩健底倉 + Sector Rotation v2 板塊資金流追蹤 + Meal Money 早盤小目標策略。
 美股前提（SPY/VIX/SOX）→ 板塊資金流選擇 → 板塊內選股。經 11 段歷史危機壓測 + 00981A 對標驗證。
 
 📊 **線上報表**：https://lemel917.github.io/Eric-Stock/stock_report.html
@@ -8,16 +8,18 @@
 
 ---
 
-## 雙策略架構總覽
+## 多策略架構總覽
 
-| | v8.5 Momentum | Sector Rotation v2 (NEW) |
-|---|:---:|:---:|
-| **邏輯** | 個股 cross-sectional ranking | 先選板塊 → 板塊內排名 |
-| **Regime** | 台股 0050 vs MA60 | 🌍 **美股 SPY + VIX + SOX** |
-| **選股因子** | Mom(20d)×3 + Trend(60MA)×1 | 板塊 flow(10/15/20d) + 板塊內動量 |
-| **角色** | 穩健底倉（低 MDD） | 積極追蹤（高報酬） |
-| **年化 (7y)** | ~25% | **+36.4%** |
-| **Sharpe (7y)** | 1.04 | **1.34** |
+| | v8.5 Momentum | Sector Rotation v2 | Meal Money (NEW) |
+|---|:---:|:---:|:---:|
+| **邏輯** | 個股 cross-sectional ranking | 先選板塊 → 板塊內排名 | 早盤少交易做多 + 每日雙向量大 |
+| **Regime** | 台股 0050 vs MA60 | 🌍 **美股 SPY + VIX + SOX** | 台股寬度 + SOX；預設不硬 gate |
+| **選股因子** | Mom(20d)×3 + Trend(60MA)×1 | 板塊 flow(10/15/20d) + 板塊內動量 | v8.5 score 或 09:00~09:10 高量價壓力 |
+| **角色** | 穩健底倉（低 MDD） | 積極追蹤（高報酬） | 09:40 前結束的小額日內 |
+| **資料粒度** | 日線（5 分鐘聚合） | 日線（5 分鐘聚合） | **5 分鐘 K 線** |
+| **狀態** | Production baseline | Research sleeve | **Experimental / paper-first** |
+| **年化 (7y)** | ~25% | **+36.4%** | — (5 分鐘僅約 2 年) |
+| **Sharpe (7y)** | 1.04 | **1.34** | — |
 
 ---
 
@@ -138,6 +140,22 @@ Layer 3: 板塊內選股
 
 ---
 
+## Meal Money 早盤策略（Experimental / Paper-first）
+
+第三個策略 sleeve，分兩種模式，直接讀取 `data/` 既有的 **5 分鐘 K 線**（`load_intraday_data` → `aggregate_daily`），不需額外資料源。
+
+| | Meal Money v2 | Daily Meal Money |
+|---|:---:|:---:|
+| **邏輯** | 早盤少交易做多，小額固定目標 | 每日雙向（多/空）量大當沖 |
+| **進場視窗** | 09:00~09:10 觀察 → 09:15 進場 | 多時段掃描 |
+| **出場** | 09:35 前強制出場（09:40 截止） | 當日沖銷 |
+| **賣出稅** | 0.3%（一般） | **0.15%（當沖減半）** |
+| **每筆目標** | +500~800 | 每日 +420 淨利目標 |
+
+> ⚠️ **限制**：5 分鐘資料僅約 2 年（2024-02 起），無法做長期危機壓測。定位為**近 2 年回測 + paper**，不接實盤（與上游 Experimental / paper-first 一致）。
+
+---
+
 ## 快速開始
 
 ```bash
@@ -151,13 +169,21 @@ python sector_rotation_report.py                          # 預設 1200 天
 python sector_rotation_report.py --start-date 2019-01-01  # 7 年回測
 python sector_rotation_report.py --compare                # vs 0050
 
+# ── Meal Money 早盤策略 (吃 data/ 5 分鐘資料) ──
+python meal_money_report.py                               # 早盤做多回測
+python daily_meal_money_report.py                         # 每日雙向當沖
+python meal_money_sweep.py                                # 參數校準
+
 # ── 深度危機壓測 (11 段) ──
 python deep_crisis_test.py
 
 # ── 驗證工具 ──
-python walk_forward.py                                    # OOS 穩定性
+python walk_forward.py                                    # Anchored OOS 穩定性
+python walk_forward_nested.py                             # Nested OOS (train→選參→test)
 python monte_carlo.py --runs 2000 --block-size 5          # Block Bootstrap
 python crisis_test.py                                     # 基礎危機壓測
+python validation/deflated_sharpe.py --equity <equity.csv> --trials 32   # Deflated Sharpe
+python validation/pbo_cscv.py --equity <e1.csv> <e2.csv> ...             # 過度配適機率 PBO
 
 # ── Paper Trading ──
 python paper_trade.py signals --enrich
@@ -176,19 +202,31 @@ tw_stocker/
 ├── monte_carlo.py                # Equity-Curve Block Bootstrap (v3)
 ├── sweep.py                      # 季度參數校準 + Telegram 警報
 ├── paper_trade.py                # Paper Trading v8 + 月報
+├── meal_money_report.py          # 🆕 Meal Money 早盤做多回測 + 報告
+├── daily_meal_money_report.py    # 🆕 每日雙向當沖回測 + 報告
+├── meal_money_sweep.py           # 🆕 Meal Money 參數校準
+├── walk_forward_nested.py        # 🆕 Nested OOS (train→選參→test)
 ├── strategy/
-│   ├── ai_strategy.py            # 因子工程 (Mom×3 + Trend×1)
-│   ├── event_backtest.py         # v8.5 事件驅動回測引擎
-│   ├── us_market.py              # 🆕 美股信號 (SPY/VIX/SOX)
-│   ├── sector_rotation_backtest.py # 🆕 板塊輪動回測引擎
+│   ├── ai_strategy.py            # 因子工程 (Mom×3 + Trend×1) + .TW/.TWO fallback
+│   ├── event_backtest.py         # v8.5 事件驅動回測引擎 (含 tradability mask)
+│   ├── evaluation.py             # 🆕 warm-up/eval window 裁切重基
+│   ├── us_market.py              # 美股信號 (SPY/VIX/SOX)
+│   ├── sector_rotation_backtest.py # 板塊輪動回測引擎 (含 tradability mask)
 │   ├── sector_flow.py            # 板塊資金流分析
+│   ├── meal_money.py             # 🆕 Meal Money 早盤策略 + 回測引擎
+│   ├── daily_meal_money.py       # 🆕 每日雙向當沖引擎
 │   ├── institutional_flow.py     # 三大法人籌碼因子
 │   ├── news_sentiment.py         # 新聞情緒因子
-│   ├── risk_metrics.py           # 風險指標計算
+│   ├── risk_metrics.py           # 風險指標 (Arithmetic Sharpe + geometric 參考)
 │   └── benchmark.py              # Benchmark (0050 / EW)
-├── artifacts/                    # 每日 CSV + 月報
+├── validation/                   # 🆕 學術驗證
+│   ├── deflated_sharpe.py        #   Deflated Sharpe Ratio
+│   └── pbo_cscv.py               #   過度配適機率 (PBO via CSCV)
+├── research/
+│   └── experiment_registry.py    # 🆕 SQLite 實驗稽核 (git commit + 資料指紋)
+├── artifacts/                    # 每日 CSV + 月報 + experiments.sqlite
 ├── .github/workflows/
-│   └── update_ai_report.yml      # 每日自動執行
+│   └── update_ai_report.yml      # 每日自動執行 + CI 測試閘門
 └── stock_report.html             # 完整交易報表
 ```
 
