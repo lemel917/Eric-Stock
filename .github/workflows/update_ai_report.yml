@@ -121,23 +121,29 @@ jobs:
           git config --global user.name "github-actions[bot]"
 
           # 只 stage 已知產出檔（白名單），避免 git add -A 把暫存/中繼檔推進 main
+          # 注意：stock_names_cache.json 也要納入白名單，否則它被 get_stock_names()
+          # 重寫後會以「已追蹤但未 stage」殘留，使後續 git rebase 因 unstaged changes 失敗。
           for f in stock_report.html paper_trading.html paper_equity.json \
-                   paper_signals.json paper_trades.json backtest_chart.png; do
+                   paper_signals.json paper_trades.json backtest_chart.png \
+                   data/stock_names_cache.json; do
             [ -e "$f" ] && git add "$f"
           done
           [ -d artifacts ] && git add artifacts/
           git commit -m "📊 AI Report v8.5 + Paper Trading ($(date -u '+%Y-%m-%d'))" || echo "No changes"
 
-          # 安全 rebase + push：衝突則 abort 後重試，避免卡在衝突狀態靜默失敗
+          # 安全 rebase + push：--autostash 容忍零星 unstaged 變更；衝突則 abort 後重試
+          pushed=false
           for attempt in 1 2 3; do
             git fetch origin main
-            if git rebase origin/main; then
-              if git push origin HEAD:main; then echo "✅ pushed"; break; fi
+            if git rebase --autostash origin/main; then
+              if git push origin HEAD:main; then echo "✅ pushed"; pushed=true; break; fi
             else
               echo "⚠️ rebase 衝突，abort 後重試 ($attempt/3)"; git rebase --abort || true
             fi
             sleep 5
           done
+          # 防呆：push 未成功就讓步驟紅燈，避免再次「綠燈卻靜默停更」
+          if [ "$pushed" != "true" ]; then echo "❌ push 失敗（重試 3 次）"; exit 1; fi
 
   # 每季第一週自動跑 sweep + Monte Carlo + Walk-Forward
   quarterly-health-check:
@@ -193,13 +199,15 @@ jobs:
           [ -d artifacts ] && git add artifacts/
           git commit -m "🔄 Quarterly health check ($(date -u '+%Y-%m-%d'))" || echo "No changes"
 
-          # 安全 rebase + push：衝突則 abort 後重試，避免卡在衝突狀態靜默失敗
+          # 安全 rebase + push：--autostash 容忍零星 unstaged 變更；衝突則 abort 後重試
+          pushed=false
           for attempt in 1 2 3; do
             git fetch origin main
-            if git rebase origin/main; then
-              if git push origin HEAD:main; then echo "✅ pushed"; break; fi
+            if git rebase --autostash origin/main; then
+              if git push origin HEAD:main; then echo "✅ pushed"; pushed=true; break; fi
             else
               echo "⚠️ rebase 衝突，abort 後重試 ($attempt/3)"; git rebase --abort || true
             fi
             sleep 5
           done
+          if [ "$pushed" != "true" ]; then echo "❌ push 失敗（重試 3 次）"; exit 1; fi
