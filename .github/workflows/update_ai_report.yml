@@ -132,10 +132,12 @@ jobs:
           git commit -m "📊 AI Report v8.5 + Paper Trading ($(date -u '+%Y-%m-%d'))" || echo "No changes"
 
           # 安全 rebase + push：--autostash 容忍零星 unstaged 變更；衝突則 abort 後重試
+          # -X theirs：產出檔衝突時以本地剛產生的版本為準（含二進位 png），
+          # 否則 add/add 或 binary 衝突是確定性的，重試幾次都救不回來
           pushed=false
           for attempt in 1 2 3; do
             git fetch origin main
-            if git rebase --autostash origin/main; then
+            if git rebase --autostash -X theirs origin/main; then
               if git push origin HEAD:main; then echo "✅ pushed"; pushed=true; break; fi
             else
               echo "⚠️ rebase 衝突，abort 後重試 ($attempt/3)"; git rebase --abort || true
@@ -146,8 +148,10 @@ jobs:
           if [ "$pushed" != "true" ]; then echo "❌ push 失敗（重試 3 次）"; exit 1; fi
 
   # 每季第一週自動跑 sweep + Monte Carlo + Walk-Forward
+  # needs 加上 generate-report：兩個 job 都會 commit 同一批產出檔
+  # （artifacts/*.csv、backtest_chart.png），平行跑會互相 push 衝突
   quarterly-health-check:
-    needs: test
+    needs: [test, generate-report]
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
 
@@ -200,10 +204,12 @@ jobs:
           git commit -m "🔄 Quarterly health check ($(date -u '+%Y-%m-%d'))" || echo "No changes"
 
           # 安全 rebase + push：--autostash 容忍零星 unstaged 變更；衝突則 abort 後重試
+          # -X theirs：產出檔衝突時以本地剛產生的版本為準（含二進位 png），
+          # 否則 add/add 或 binary 衝突是確定性的，重試幾次都救不回來
           pushed=false
           for attempt in 1 2 3; do
             git fetch origin main
-            if git rebase --autostash origin/main; then
+            if git rebase --autostash -X theirs origin/main; then
               if git push origin HEAD:main; then echo "✅ pushed"; pushed=true; break; fi
             else
               echo "⚠️ rebase 衝突，abort 後重試 ($attempt/3)"; git rebase --abort || true
