@@ -1,34 +1,16 @@
 {
   "start_date": "2026-05-27",
   "initial_capital": 200000,
-  "capital": 140266.8352408266,
+  "capital": 137955.1628733718,
   "positions": {
-    "2327": {
-      "entry": 1080.0,
-      "tp": 1379.2,
-      "sl": 893.0,
-      "entry_date": "2026-06-18",
-      "shares": 12.0,
-      "day_count": 12,
-      "current_price": 1010.0
-    },
     "6669": {
       "entry": 4855.0,
       "tp": 5916.8,
       "sl": 4191.4,
       "entry_date": "2026-06-22",
       "shares": 3.0,
-      "day_count": 8,
-      "current_price": 5100.0
-    },
-    "6446": {
-      "entry": 1270.0,
-      "tp": 1506.8,
-      "sl": 1122.0,
-      "entry_date": "2026-06-30",
-      "shares": 13.0,
-      "day_count": 5,
-      "current_price": 1465.0
+      "day_count": 9,
+      "current_price": 5050.0
     },
     "1303": {
       "entry": 197.0,
@@ -36,8 +18,8 @@
       "sl": 168.4,
       "entry_date": "2026-07-02",
       "shares": 81.0,
-      "day_count": 3,
-      "current_price": 185.0
+      "day_count": 4,
+      "current_price": 182.0
     },
     "3481": {
       "entry": 69.2,
@@ -45,6 +27,23 @@
       "sl": 56.8,
       "entry_date": "2026-07-07",
       "shares": 225.0,
+      "day_count": 1,
+      "current_price": 65.19999694824219
+    },
+    "6446": {
+      "entry": 1530.0,
+      "tp": 1809.2,
+      "sl": 1355.5,
+      "entry_date": "2026-07-08",
+      "shares": 11.0,
+      "day_count": 0
+    },
+    "2303": {
+      "entry": 163.0,
+      "tp": 208.1,
+      "sl": 134.8,
+      "entry_date": "2026-07-08",
+      "shares": 94.0,
       "day_count": 0
     }
   },
@@ -204,6 +203,30 @@
       "entry_date": "2026-06-18",
       "exit_date": "2026-07-07",
       "days_held": 12
+    },
+    {
+      "ticker": "2327",
+      "entry": 1080.0,
+      "exit": 893.0,
+      "shares": 12.0,
+      "pnl": -2334.0,
+      "pnl_pct": -17.31,
+      "reason": "SL",
+      "entry_date": "2026-06-18",
+      "exit_date": "2026-07-08",
+      "days_held": 13
+    },
+    {
+      "ticker": "6446",
+      "entry": 1270.0,
+      "exit": 1506.8,
+      "shares": 13.0,
+      "pnl": 2932.0,
+      "pnl_pct": 18.65,
+      "reason": "TP",
+      "entry_date": "2026-06-30",
+      "exit_date": "2026-07-08",
+      "days_held": 6
     }
   ],
   "equity_curve": [
@@ -409,6 +432,13 @@
       "capital": 140267.0,
       "n_positions": 5,
       "n_closed_today": 1
+    },
+    {
+      "date": "2026-07-08",
+      "equity": 214669.0,
+      "capital": 137955.0,
+      "n_positions": 5,
+      "n_closed_today": 2
     }
   ],
   "daily_signals": [
@@ -758,6 +788,18 @@
         "1326",
         "2303",
         "2890"
+      ]
+    },
+    {
+      "date": "2026-07-08",
+      "tickers": [
+        "1303",
+        "6446",
+        "3481",
+        "2303",
+        "1326",
+        "2379",
+        "2887"
       ]
     }
   ]
