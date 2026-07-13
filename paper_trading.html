@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Trading v8.5 — 2026-07-10</title>
+    <title>Paper Trading v8.5 — 2026-07-13</title>
     <meta name="description" content="TW Stocker v8.5 Paper Trading 實時績效追蹤">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
@@ -146,21 +146,21 @@
     <h1>📈 Paper Trading v8.5</h1>
     <p class="subtitle">
         <span class="badge badge-live">● LIVE</span>
-        起始日 2026-05-27 | 更新 2026-07-10 | 初始資金 200,000
+        起始日 2026-05-27 | 更新 2026-07-13 | 初始資金 200,000
     </p>
 
     <div class="metrics">
         <div class="metric">
             <div class="label">總權益</div>
-            <div class="value green">212,067</div>
+            <div class="value green">211,663</div>
         </div>
         <div class="metric">
             <div class="label">總報酬</div>
-            <div class="value green">+6.0%</div>
+            <div class="value green">+5.8%</div>
         </div>
         <div class="metric">
             <div class="label">年化報酬</div>
-            <div class="value green">+47.5%</div>
+            <div class="value green">+44.5%</div>
         </div>
         <div class="metric">
             <div class="label">最大回撤</div>
@@ -199,65 +199,65 @@
             <td>緯穎</td>
             <td>3</td>
             <td>4855.0</td>
-            <td>5040.0</td>
-            <td style="color:#2f7d4f;font-weight:700">+3.8%</td>
-            <td style="color:#2f7d4f;font-weight:700">+555</td>
+            <td>4960.0</td>
+            <td style="color:#2f7d4f;font-weight:700">+2.2%</td>
+            <td style="color:#2f7d4f;font-weight:700">+315</td>
             <td>5916.8</td>
             <td>4191.4</td>
             <td>2026-06-22</td>
-            <td>11天</td>
+            <td>12天</td>
         </tr>
         <tr>
             <td><b>1303</b></td>
             <td>南亞</td>
             <td>81</td>
             <td>197.0</td>
-            <td>181.5</td>
-            <td style="color:#b4452f;font-weight:700">-7.9%</td>
-            <td style="color:#b4452f;font-weight:700">-1,256</td>
+            <td>199.5</td>
+            <td style="color:#2f7d4f;font-weight:700">+1.3%</td>
+            <td style="color:#2f7d4f;font-weight:700">+202</td>
             <td>242.8</td>
             <td>168.4</td>
             <td>2026-07-02</td>
-            <td>6天</td>
+            <td>7天</td>
         </tr>
         <tr>
             <td><b>3481</b></td>
             <td>群創</td>
             <td>225</td>
             <td>69.2</td>
-            <td>65.3</td>
-            <td style="color:#b4452f;font-weight:700">-5.6%</td>
-            <td style="color:#b4452f;font-weight:700">-877</td>
+            <td>61.0</td>
+            <td style="color:#b4452f;font-weight:700">-11.8%</td>
+            <td style="color:#b4452f;font-weight:700">-1,845</td>
             <td>89.0</td>
             <td>56.8</td>
             <td>2026-07-07</td>
-            <td>3天</td>
+            <td>4天</td>
         </tr>
         <tr>
             <td><b>2303</b></td>
             <td>聯電</td>
             <td>94</td>
             <td>163.0</td>
-            <td>156.0</td>
-            <td style="color:#b4452f;font-weight:700">-4.3%</td>
-            <td style="color:#b4452f;font-weight:700">-658</td>
+            <td>153.5</td>
+            <td style="color:#b4452f;font-weight:700">-5.8%</td>
+            <td style="color:#b4452f;font-weight:700">-893</td>
             <td>208.1</td>
             <td>134.8</td>
             <td>2026-07-08</td>
-            <td>2天</td>
+            <td>3天</td>
         </tr>
         <tr>
             <td><b>6446</b></td>
             <td>藥華藥</td>
             <td>12</td>
             <td>1285.0</td>
-            <td>1285.0</td>
-            <td style="color:#2f7d4f;font-weight:700">+0.0%</td>
-            <td style="color:#2f7d4f;font-weight:700">+0</td>
+            <td>1250.0</td>
+            <td style="color:#b4452f;font-weight:700">-2.7%</td>
+            <td style="color:#b4452f;font-weight:700">-420</td>
             <td>1560.2</td>
             <td>1113.0</td>
             <td>2026-07-09</td>
-            <td>1天</td>
+            <td>2天</td>
         </tr>
         </table>
     </div>
@@ -473,10 +473,10 @@ const ctx = document.getElementById('equityChart').getContext('2d');
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ["2026-05-27", "2026-05-28", "2026-05-29", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-08", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-12", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10"],
+        labels: ["2026-05-27", "2026-05-28", "2026-05-29", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-08", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-12", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-13"],
         datasets: [{
             label: 'Paper Trading 權益',
-            data: [204862.0, 204544.0, 207467.0, 211617.0, 210210.0, 210273.0, 206565.0, 205875.0, 201447.0, 204283.0, 199622.0, 201144.0, 204772.0, 208807.0, 210025.0, 212448.0, 215446.0, 215446.0, 215210.0, 215210.0, 216770.0, 212389.0, 213971.0, 214742.0, 218336.0, 218367.0, 218506.0, 216918.0, 217804.0, 214669.0, 212067.0, 212067.0],
+            data: [204862.0, 204544.0, 207467.0, 211617.0, 210210.0, 210273.0, 206565.0, 205875.0, 201447.0, 204283.0, 199622.0, 201144.0, 204772.0, 208807.0, 210025.0, 212448.0, 215446.0, 215446.0, 215210.0, 215210.0, 216770.0, 212389.0, 213971.0, 214742.0, 218336.0, 218367.0, 218506.0, 216918.0, 217804.0, 214669.0, 212067.0, 212067.0, 211663.0],
             borderColor: '#9c6b3f',
             backgroundColor: 'rgba(156, 107, 63, 0.16)',
             fill: true,
@@ -485,7 +485,7 @@ new Chart(ctx, {
             borderWidth: 2,
         }, {
             label: '初始資金',
-            data: [200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000],
+            data: [200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000],
             borderColor: '#b9a07c',
             borderDash: [5, 5],
             fill: false,
