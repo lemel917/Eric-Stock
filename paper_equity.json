@@ -1,7 +1,7 @@
 {
   "start_date": "2026-05-27",
   "initial_capital": 200000,
-  "capital": 136458.48820087925,
+  "capital": 149060.94694087925,
   "positions": {
     "1303": {
       "entry": 197.0,
@@ -9,17 +9,8 @@
       "sl": 168.4,
       "entry_date": "2026-07-02",
       "shares": 81.0,
-      "day_count": 11,
-      "current_price": 199.0
-    },
-    "2303": {
-      "entry": 163.0,
-      "tp": 208.1,
-      "sl": 134.8,
-      "entry_date": "2026-07-08",
-      "shares": 94.0,
-      "day_count": 7,
-      "current_price": 144.0
+      "day_count": 12,
+      "current_price": 186.5
     },
     "6446": {
       "entry": 1285.0,
@@ -27,8 +18,8 @@
       "sl": 1113.0,
       "entry_date": "2026-07-09",
       "shares": 12.0,
-      "day_count": 6,
-      "current_price": 1195.0
+      "day_count": 7,
+      "current_price": 1175.0
     },
     "2634": {
       "entry": 67.1,
@@ -36,8 +27,8 @@
       "sl": 59.5,
       "entry_date": "2026-07-14",
       "shares": 205.0,
-      "day_count": 3,
-      "current_price": 61.20000076293945
+      "day_count": 4,
+      "current_price": 65.0
     },
     "6505": {
       "entry": 81.3,
@@ -45,7 +36,8 @@
       "sl": 73.0,
       "entry_date": "2026-07-17",
       "shares": 187.0,
-      "day_count": 0
+      "day_count": 1,
+      "current_price": 77.69999694824219
     }
   },
   "closed_trades": [
@@ -263,6 +255,18 @@
       "reason": "SL",
       "entry_date": "2026-07-07",
       "exit_date": "2026-07-17",
+      "days_held": 8
+    },
+    {
+      "ticker": "2303",
+      "entry": 163.0,
+      "exit": 134.8,
+      "shares": 94.0,
+      "pnl": -2757.0,
+      "pnl_pct": -17.3,
+      "reason": "SL",
+      "entry_date": "2026-07-08",
+      "exit_date": "2026-07-20",
       "days_held": 8
     }
   ],
@@ -524,6 +528,13 @@
       "equity": 208203.0,
       "capital": 136458.0,
       "n_positions": 5,
+      "n_closed_today": 1
+    },
+    {
+      "date": "2026-07-20",
+      "equity": 206122.0,
+      "capital": 149061.0,
+      "n_positions": 4,
       "n_closed_today": 1
     }
   ],
@@ -969,6 +980,18 @@
         "2634",
         "1326",
         "1301",
+        "2887"
+      ]
+    },
+    {
+      "date": "2026-07-20",
+      "tickers": [
+        "6505",
+        "1303",
+        "2634",
+        "6446",
+        "1301",
+        "1326",
         "2887"
       ]
     }
