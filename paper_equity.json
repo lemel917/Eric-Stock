@@ -9,8 +9,8 @@
       "sl": 1113.0,
       "entry_date": "2026-07-09",
       "shares": 12.0,
-      "day_count": 12,
-      "current_price": 1195.0
+      "day_count": 13,
+      "current_price": 1115.0
     },
     "2634": {
       "entry": 67.1,
@@ -18,8 +18,8 @@
       "sl": 59.5,
       "entry_date": "2026-07-14",
       "shares": 205.0,
-      "day_count": 9,
-      "current_price": 61.79999923706055
+      "day_count": 10,
+      "current_price": 60.900001525878906
     },
     "6505": {
       "entry": 81.3,
@@ -27,8 +27,8 @@
       "sl": 73.0,
       "entry_date": "2026-07-17",
       "shares": 187.0,
-      "day_count": 6,
-      "current_price": 77.9000015258789
+      "day_count": 7,
+      "current_price": 74.5999984741211
     },
     "1326": {
       "entry": 68.6,
@@ -36,8 +36,8 @@
       "sl": 57.2,
       "entry_date": "2026-07-21",
       "shares": 217.0,
-      "day_count": 4,
-      "current_price": 65.0
+      "day_count": 5,
+      "current_price": 60.900001525878906
     },
     "1303": {
       "entry": 197.0,
@@ -45,8 +45,8 @@
       "sl": 154.6,
       "entry_date": "2026-07-23",
       "shares": 76.0,
-      "day_count": 2,
-      "current_price": 174.0
+      "day_count": 3,
+      "current_price": 157.0
     },
     "2395": {
       "entry": 577.0,
@@ -54,7 +54,8 @@
       "sl": 506.1,
       "entry_date": "2026-07-27",
       "shares": 23.0,
-      "day_count": 0
+      "day_count": 1,
+      "current_price": 556.0
     }
   },
   "closed_trades": [
@@ -600,6 +601,13 @@
       "capital": 121426.0,
       "n_positions": 6,
       "n_closed_today": 0
+    },
+    {
+      "date": "2026-07-28",
+      "equity": 199176.0,
+      "capital": 121426.0,
+      "n_positions": 6,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -1117,6 +1125,18 @@
         "3231",
         "1326",
         "1303"
+      ]
+    },
+    {
+      "date": "2026-07-28",
+      "tickers": [
+        "6505",
+        "2395",
+        "3231",
+        "6669",
+        "2634",
+        "1326",
+        "2357"
       ]
     }
   ]
