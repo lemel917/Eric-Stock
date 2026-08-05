@@ -9,8 +9,8 @@
       "sl": 506.1,
       "entry_date": "2026-07-27",
       "shares": 23.0,
-      "day_count": 6,
-      "current_price": 576.0
+      "day_count": 7,
+      "current_price": 633.0
     },
     "2357": {
       "entry": 761.0,
@@ -18,8 +18,8 @@
       "sl": 699.0,
       "entry_date": "2026-07-29",
       "shares": 19.0,
-      "day_count": 4,
-      "current_price": 806.0
+      "day_count": 5,
+      "current_price": 838.0
     },
     "6505": {
       "entry": 71.6,
@@ -27,8 +27,8 @@
       "sl": 57.1,
       "entry_date": "2026-07-30",
       "shares": 237.0,
-      "day_count": 3,
-      "current_price": 68.19999694824219
+      "day_count": 4,
+      "current_price": 67.5999984741211
     },
     "2886": {
       "entry": 51.5,
@@ -36,8 +36,8 @@
       "sl": 48.6,
       "entry_date": "2026-07-30",
       "shares": 297.0,
-      "day_count": 3,
-      "current_price": 50.70000076293945
+      "day_count": 4,
+      "current_price": 51.20000076293945
     },
     "2884": {
       "entry": 37.7,
@@ -45,8 +45,8 @@
       "sl": 35.7,
       "entry_date": "2026-07-30",
       "shares": 365.0,
-      "day_count": 3,
-      "current_price": 38.0
+      "day_count": 4,
+      "current_price": 38.099998474121094
     },
     "2634": {
       "entry": 58.6,
@@ -54,8 +54,8 @@
       "sl": 46.4,
       "entry_date": "2026-07-30",
       "shares": 211.0,
-      "day_count": 3,
-      "current_price": 60.5
+      "day_count": 4,
+      "current_price": 63.5
     },
     "3231": {
       "entry": 186.0,
@@ -63,8 +63,8 @@
       "sl": 163.0,
       "entry_date": "2026-08-03",
       "shares": 60.0,
-      "day_count": 1,
-      "current_price": 195.0
+      "day_count": 2,
+      "current_price": 193.0
     }
   },
   "closed_trades": [
@@ -712,6 +712,13 @@
       "capital": 100115.0,
       "n_positions": 7,
       "n_closed_today": 0
+    },
+    {
+      "date": "2026-08-05",
+      "equity": 200708.0,
+      "capital": 100115.0,
+      "n_positions": 7,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -1301,6 +1308,18 @@
         "2357",
         "6505",
         "2884"
+      ]
+    },
+    {
+      "date": "2026-08-05",
+      "tickers": [
+        "3231",
+        "6669",
+        "2395",
+        "2357",
+        "2301",
+        "2408",
+        "3017"
       ]
     }
   ]
