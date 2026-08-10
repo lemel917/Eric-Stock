@@ -9,8 +9,8 @@
       "sl": 506.1,
       "entry_date": "2026-07-27",
       "shares": 23.0,
-      "day_count": 9,
-      "current_price": 634.0
+      "day_count": 10,
+      "current_price": 667.0
     },
     "2357": {
       "entry": 761.0,
@@ -18,8 +18,8 @@
       "sl": 699.0,
       "entry_date": "2026-07-29",
       "shares": 19.0,
-      "day_count": 7,
-      "current_price": 817.0
+      "day_count": 8,
+      "current_price": 818.0
     },
     "6505": {
       "entry": 71.6,
@@ -27,8 +27,8 @@
       "sl": 57.1,
       "entry_date": "2026-07-30",
       "shares": 237.0,
-      "day_count": 6,
-      "current_price": 71.0
+      "day_count": 7,
+      "current_price": 69.0
     },
     "2886": {
       "entry": 51.5,
@@ -36,8 +36,8 @@
       "sl": 48.6,
       "entry_date": "2026-07-30",
       "shares": 297.0,
-      "day_count": 6,
-      "current_price": 50.900001525878906
+      "day_count": 7,
+      "current_price": 51.0
     },
     "2884": {
       "entry": 37.7,
@@ -45,8 +45,8 @@
       "sl": 35.7,
       "entry_date": "2026-07-30",
       "shares": 365.0,
-      "day_count": 6,
-      "current_price": 38.150001525878906
+      "day_count": 7,
+      "current_price": 37.79999923706055
     },
     "2634": {
       "entry": 58.6,
@@ -54,8 +54,8 @@
       "sl": 46.4,
       "entry_date": "2026-07-30",
       "shares": 211.0,
-      "day_count": 6,
-      "current_price": 61.70000076293945
+      "day_count": 7,
+      "current_price": 61.0
     },
     "3231": {
       "entry": 186.0,
@@ -63,8 +63,8 @@
       "sl": 163.0,
       "entry_date": "2026-08-03",
       "shares": 60.0,
-      "day_count": 4,
-      "current_price": 183.5
+      "day_count": 5,
+      "current_price": 193.0
     }
   },
   "closed_trades": [
@@ -733,6 +733,13 @@
       "capital": 100115.0,
       "n_positions": 7,
       "n_closed_today": 0
+    },
+    {
+      "date": "2026-08-10",
+      "equity": 200746.0,
+      "capital": 100115.0,
+      "n_positions": 7,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -1358,6 +1365,18 @@
         "3017",
         "2357",
         "2618"
+      ]
+    },
+    {
+      "date": "2026-08-10",
+      "tickers": [
+        "2395",
+        "3231",
+        "2301",
+        "2408",
+        "3017",
+        "6669",
+        "2880"
       ]
     }
   ]
