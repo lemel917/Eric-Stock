@@ -9,8 +9,8 @@
       "sl": 197.8,
       "entry_date": "2026-09-01",
       "shares": 51.0,
-      "day_count": 11,
-      "current_price": 224.0
+      "day_count": 12,
+      "current_price": 236.0
     },
     "3017": {
       "entry": 3570.0,
@@ -18,8 +18,8 @@
       "sl": 3076.5,
       "entry_date": "2026-09-04",
       "shares": 4.0,
-      "day_count": 8,
-      "current_price": 3175.0
+      "day_count": 9,
+      "current_price": 3185.0
     },
     "3443": {
       "entry": 5935.0,
@@ -27,8 +27,8 @@
       "sl": 4951.2,
       "entry_date": "2026-09-07",
       "shares": 2.0,
-      "day_count": 7,
-      "current_price": 6170.0
+      "day_count": 8,
+      "current_price": 6500.0
     },
     "6505": {
       "entry": 86.2,
@@ -36,8 +36,8 @@
       "sl": 76.4,
       "entry_date": "2026-09-10",
       "shares": 170.0,
-      "day_count": 4,
-      "current_price": 80.5
+      "day_count": 5,
+      "current_price": 86.19999694824219
     },
     "2615": {
       "entry": 110.5,
@@ -45,8 +45,8 @@
       "sl": 91.9,
       "entry_date": "2026-09-10",
       "shares": 119.0,
-      "day_count": 4,
-      "current_price": 115.0
+      "day_count": 5,
+      "current_price": 120.5
     },
     "2883": {
       "entry": 38.8,
@@ -54,8 +54,8 @@
       "sl": 36.2,
       "entry_date": "2026-09-14",
       "shares": 339.0,
-      "day_count": 2,
-      "current_price": 39.150001525878906
+      "day_count": 3,
+      "current_price": 39.650001525878906
     },
     "2884": {
       "entry": 46.3,
@@ -63,8 +63,8 @@
       "sl": 43.2,
       "entry_date": "2026-09-14",
       "shares": 255.0,
-      "day_count": 2,
-      "current_price": 46.45000076293945
+      "day_count": 3,
+      "current_price": 47.29999923706055
     }
   },
   "closed_trades": [
@@ -1085,6 +1085,13 @@
       "capital": 106368.0,
       "n_positions": 7,
       "n_closed_today": 0
+    },
+    {
+      "date": "2026-09-17",
+      "equity": 198641.0,
+      "capital": 106368.0,
+      "n_positions": 7,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -2046,6 +2053,18 @@
         "2881",
         "2892",
         "3443"
+      ]
+    },
+    {
+      "date": "2026-09-17",
+      "tickers": [
+        "2883",
+        "1303",
+        "2884",
+        "2887",
+        "2892",
+        "2303",
+        "6505"
       ]
     }
   ]
