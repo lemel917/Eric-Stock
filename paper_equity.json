@@ -9,8 +9,8 @@
       "sl": 76.4,
       "entry_date": "2026-09-10",
       "shares": 170.0,
-      "day_count": 12,
-      "current_price": 87.19999694824219
+      "day_count": 13,
+      "current_price": 94.30000305175781
     },
     "2615": {
       "entry": 110.5,
@@ -18,8 +18,8 @@
       "sl": 91.9,
       "entry_date": "2026-09-10",
       "shares": 119.0,
-      "day_count": 12,
-      "current_price": 115.5
+      "day_count": 13,
+      "current_price": 111.0
     },
     "2883": {
       "entry": 38.8,
@@ -27,7 +27,7 @@
       "sl": 36.2,
       "entry_date": "2026-09-14",
       "shares": 339.0,
-      "day_count": 10,
+      "day_count": 11,
       "current_price": 38.95000076293945
     },
     "2884": {
@@ -36,8 +36,8 @@
       "sl": 43.2,
       "entry_date": "2026-09-14",
       "shares": 255.0,
-      "day_count": 10,
-      "current_price": 45.599998474121094
+      "day_count": 11,
+      "current_price": 44.900001525878906
     },
     "3443": {
       "entry": 7615.0,
@@ -45,8 +45,8 @@
       "sl": 6566.9,
       "entry_date": "2026-09-21",
       "shares": 2.0,
-      "day_count": 5,
-      "current_price": 8525.0
+      "day_count": 6,
+      "current_price": 7925.0
     },
     "2454": {
       "entry": 5285.0,
@@ -54,8 +54,8 @@
       "sl": 4707.5,
       "entry_date": "2026-09-25",
       "shares": 3.0,
-      "day_count": 1,
-      "current_price": 5285.0
+      "day_count": 2,
+      "current_price": 4910.0
     }
   },
   "closed_trades": [
@@ -1168,6 +1168,13 @@
       "capital": 121494.0,
       "n_positions": 6,
       "n_closed_today": 0
+    },
+    {
+      "date": "2026-09-29",
+      "equity": 205968.0,
+      "capital": 121494.0,
+      "n_positions": 6,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -2225,6 +2232,18 @@
         "2303",
         "6505",
         "2404"
+      ]
+    },
+    {
+      "date": "2026-09-29",
+      "tickers": [
+        "6505",
+        "3443",
+        "2454",
+        "2883",
+        "2303",
+        "2884",
+        "1303"
       ]
     }
   ]
