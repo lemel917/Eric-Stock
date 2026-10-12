@@ -1,24 +1,15 @@
 {
   "start_date": "2026-05-27",
   "initial_capital": 200000,
-  "capital": 144115.14080552827,
+  "capital": 144631.01079953508,
   "positions": {
-    "3443": {
-      "entry": 7615.0,
-      "tp": 9292.0,
-      "sl": 6566.9,
-      "entry_date": "2026-09-21",
-      "shares": 2.0,
-      "day_count": 14,
-      "current_price": 8360.0
-    },
     "3037": {
       "entry": 1215.0,
       "tp": 1431.8,
       "sl": 1079.5,
       "entry_date": "2026-10-01",
       "shares": 12.0,
-      "day_count": 6,
+      "day_count": 7,
       "current_price": 1270.0
     },
     "6505": {
@@ -27,7 +18,7 @@
       "sl": 83.0,
       "entry_date": "2026-10-01",
       "shares": 144.0,
-      "day_count": 6,
+      "day_count": 7,
       "current_price": 110.5
     },
     "1303": {
@@ -36,6 +27,15 @@
       "sl": 271.7,
       "entry_date": "2026-10-09",
       "shares": 52.0,
+      "day_count": 1,
+      "current_price": 310.0
+    },
+    "3443": {
+      "entry": 8360.0,
+      "tp": 10174.0,
+      "sl": 7226.2,
+      "entry_date": "2026-10-12",
+      "shares": 2.0,
       "day_count": 0
     }
   },
@@ -591,6 +591,18 @@
       "entry_date": "2026-09-25",
       "exit_date": "2026-10-09",
       "days_held": 10
+    },
+    {
+      "ticker": "3443",
+      "entry": 7615.0,
+      "exit": 8360.0,
+      "shares": 2.0,
+      "pnl": 1362.0,
+      "pnl_pct": 9.78,
+      "reason": "TIME",
+      "entry_date": "2026-09-21",
+      "exit_date": "2026-10-12",
+      "days_held": 15
     }
   ],
   "equity_curve": [
@@ -1270,6 +1282,13 @@
       "date": "2026-10-09",
       "equity": 208107.0,
       "capital": 144115.0,
+      "n_positions": 4,
+      "n_closed_today": 1
+    },
+    {
+      "date": "2026-10-12",
+      "equity": 208623.0,
+      "capital": 144631.0,
       "n_positions": 4,
       "n_closed_today": 1
     }
@@ -2437,6 +2456,18 @@
         "1301",
         "2404",
         "3711"
+      ]
+    },
+    {
+      "date": "2026-10-12",
+      "tickers": [
+        "3443",
+        "1303",
+        "3037",
+        "6505",
+        "1301",
+        "2404",
+        "2368"
       ]
     }
   ]
