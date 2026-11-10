@@ -1,7 +1,7 @@
 {
   "start_date": "2026-05-27",
   "initial_capital": 200000,
-  "capital": 123357.49540561602,
+  "capital": 110991.83167241856,
   "positions": {
     "4938": {
       "entry": 101.5,
@@ -9,8 +9,8 @@
       "sl": 91.1,
       "entry_date": "2026-11-04",
       "shares": 142.0,
-      "day_count": 3,
-      "current_price": 92.9000015258789
+      "day_count": 4,
+      "current_price": 95.4000015258789
     },
     "1101": {
       "entry": 27.7,
@@ -18,8 +18,8 @@
       "sl": 25.9,
       "entry_date": "2026-11-04",
       "shares": 468.0,
-      "day_count": 3,
-      "current_price": 26.75
+      "day_count": 4,
+      "current_price": 26.799999237060547
     },
     "2412": {
       "entry": 161.5,
@@ -27,8 +27,8 @@
       "sl": 153.8,
       "entry_date": "2026-11-06",
       "shares": 86.0,
-      "day_count": 1,
-      "current_price": 163.5
+      "day_count": 2,
+      "current_price": 159.0
     },
     "2891": {
       "entry": 74.9,
@@ -36,8 +36,8 @@
       "sl": 69.5,
       "entry_date": "2026-11-06",
       "shares": 168.0,
-      "day_count": 1,
-      "current_price": 73.4000015258789
+      "day_count": 2,
+      "current_price": 75.9000015258789
     },
     "2886": {
       "entry": 53.5,
@@ -45,6 +45,15 @@
       "sl": 49.1,
       "entry_date": "2026-11-09",
       "shares": 256.0,
+      "day_count": 1,
+      "current_price": 52.79999923706055
+    },
+    "6446": {
+      "entry": 1370.0,
+      "tp": 1640.0,
+      "sl": 1201.2,
+      "entry_date": "2026-11-10",
+      "shares": 9.0,
       "day_count": 0
     }
   },
@@ -1572,6 +1581,13 @@
       "capital": 123357.0,
       "n_positions": 5,
       "n_closed_today": 2
+    },
+    {
+      "date": "2026-11-10",
+      "equity": 189353.0,
+      "capital": 110992.0,
+      "n_positions": 6,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -2975,6 +2991,18 @@
         "2886",
         "3045",
         "2603",
+        "2884",
+        "1101"
+      ]
+    },
+    {
+      "date": "2026-11-10",
+      "tickers": [
+        "6446",
+        "2891",
+        "2412",
+        "3045",
+        "2886",
         "2884",
         "1101"
       ]
