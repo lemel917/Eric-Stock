@@ -9,8 +9,8 @@
       "sl": 91.1,
       "entry_date": "2026-11-04",
       "shares": 142.0,
-      "day_count": 6,
-      "current_price": 96.19999694824219
+      "day_count": 7,
+      "current_price": 92.19999694824219
     },
     "1101": {
       "entry": 27.7,
@@ -18,8 +18,8 @@
       "sl": 25.9,
       "entry_date": "2026-11-04",
       "shares": 468.0,
-      "day_count": 6,
-      "current_price": 27.700000762939453
+      "day_count": 7,
+      "current_price": 27.149999618530273
     },
     "2412": {
       "entry": 161.5,
@@ -27,8 +27,8 @@
       "sl": 153.8,
       "entry_date": "2026-11-06",
       "shares": 86.0,
-      "day_count": 4,
-      "current_price": 161.0
+      "day_count": 5,
+      "current_price": 162.0
     },
     "2891": {
       "entry": 74.9,
@@ -36,8 +36,8 @@
       "sl": 69.5,
       "entry_date": "2026-11-06",
       "shares": 168.0,
-      "day_count": 4,
-      "current_price": 74.69999694824219
+      "day_count": 5,
+      "current_price": 75.4000015258789
     },
     "2886": {
       "entry": 53.5,
@@ -45,8 +45,8 @@
       "sl": 49.1,
       "entry_date": "2026-11-09",
       "shares": 256.0,
-      "day_count": 3,
-      "current_price": 54.20000076293945
+      "day_count": 4,
+      "current_price": 54.400001525878906
     },
     "6446": {
       "entry": 1370.0,
@@ -54,8 +54,8 @@
       "sl": 1201.2,
       "entry_date": "2026-11-10",
       "shares": 9.0,
-      "day_count": 2,
-      "current_price": 1335.0
+      "day_count": 3,
+      "current_price": 1365.0
     }
   },
   "closed_trades": [
@@ -1603,6 +1603,13 @@
       "capital": 110992.0,
       "n_positions": 6,
       "n_closed_today": 0
+    },
+    {
+      "date": "2026-11-13",
+      "equity": 189601.0,
+      "capital": 110992.0,
+      "n_positions": 6,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -3044,6 +3051,18 @@
         "1101",
         "2884",
         "3045"
+      ]
+    },
+    {
+      "date": "2026-11-13",
+      "tickers": [
+        "6446",
+        "2412",
+        "2886",
+        "2891",
+        "3443",
+        "1101",
+        "2881"
       ]
     }
   ]
