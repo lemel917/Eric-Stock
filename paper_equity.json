@@ -9,8 +9,8 @@
       "sl": 25.9,
       "entry_date": "2026-11-04",
       "shares": 468.0,
-      "day_count": 10,
-      "current_price": 26.549999237060547
+      "day_count": 11,
+      "current_price": 26.25
     },
     "2412": {
       "entry": 161.5,
@@ -18,7 +18,7 @@
       "sl": 153.8,
       "entry_date": "2026-11-06",
       "shares": 86.0,
-      "day_count": 8,
+      "day_count": 9,
       "current_price": 164.5
     },
     "2891": {
@@ -27,8 +27,8 @@
       "sl": 69.5,
       "entry_date": "2026-11-06",
       "shares": 168.0,
-      "day_count": 8,
-      "current_price": 77.5
+      "day_count": 9,
+      "current_price": 73.4000015258789
     },
     "2886": {
       "entry": 53.5,
@@ -36,8 +36,8 @@
       "sl": 49.1,
       "entry_date": "2026-11-09",
       "shares": 256.0,
-      "day_count": 7,
-      "current_price": 54.70000076293945
+      "day_count": 8,
+      "current_price": 52.599998474121094
     },
     "6446": {
       "entry": 1370.0,
@@ -45,8 +45,8 @@
       "sl": 1201.2,
       "entry_date": "2026-11-10",
       "shares": 9.0,
-      "day_count": 6,
-      "current_price": 1280.0
+      "day_count": 7,
+      "current_price": 1245.0
     },
     "2618": {
       "entry": 47.4,
@@ -54,8 +54,8 @@
       "sl": 43.8,
       "entry_date": "2026-11-17",
       "shares": 235.0,
-      "day_count": 1,
-      "current_price": 48.099998474121094
+      "day_count": 2,
+      "current_price": 46.79999923706055
     }
   },
   "closed_trades": [
@@ -1655,6 +1655,13 @@
       "capital": 107265.0,
       "n_positions": 6,
       "n_closed_today": 1
+    },
+    {
+      "date": "2026-11-19",
+      "equity": 181696.0,
+      "capital": 107265.0,
+      "n_positions": 6,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -3144,6 +3151,18 @@
         "2892",
         "2886",
         "1101"
+      ]
+    },
+    {
+      "date": "2026-11-19",
+      "tickers": [
+        "2618",
+        "2412",
+        "3661",
+        "2603",
+        "2892",
+        "2886",
+        "2891"
       ]
     }
   ]
