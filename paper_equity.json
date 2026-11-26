@@ -1,7 +1,7 @@
 {
   "start_date": "2026-05-27",
   "initial_capital": 200000,
-  "capital": 127481.9683022143,
+  "capital": 114702.85709467958,
   "positions": {
     "2412": {
       "entry": 161.5,
@@ -9,8 +9,8 @@
       "sl": 153.8,
       "entry_date": "2026-11-06",
       "shares": 86.0,
-      "day_count": 13,
-      "current_price": 164.5
+      "day_count": 14,
+      "current_price": 163.5
     },
     "2886": {
       "entry": 53.5,
@@ -18,8 +18,8 @@
       "sl": 49.1,
       "entry_date": "2026-11-09",
       "shares": 256.0,
-      "day_count": 12,
-      "current_price": 55.0
+      "day_count": 13,
+      "current_price": 49.70000076293945
     },
     "2618": {
       "entry": 47.4,
@@ -27,8 +27,8 @@
       "sl": 43.8,
       "entry_date": "2026-11-17",
       "shares": 235.0,
-      "day_count": 6,
-      "current_price": 48.599998474121094
+      "day_count": 7,
+      "current_price": 45.70000076293945
     },
     "3661": {
       "entry": 3915.0,
@@ -36,6 +36,15 @@
       "sl": 3174.4,
       "entry_date": "2026-11-25",
       "shares": 4.0,
+      "day_count": 1,
+      "current_price": 3605.0
+    },
+    "1216": {
+      "entry": 78.7,
+      "tp": 89.6,
+      "sl": 71.9,
+      "entry_date": "2026-11-26",
+      "shares": 162.0,
       "day_count": 0
     }
   },
@@ -1707,6 +1716,13 @@
       "capital": 127482.0,
       "n_positions": 4,
       "n_closed_today": 0
+    },
+    {
+      "date": "2026-11-26",
+      "equity": 179396.0,
+      "capital": 114703.0,
+      "n_positions": 5,
+      "n_closed_today": 0
     }
   ],
   "daily_signals": [
@@ -3244,6 +3260,15 @@
         "2412",
         "3661",
         "2886",
+        "1216",
+        "2603"
+      ]
+    },
+    {
+      "date": "2026-11-26",
+      "tickers": [
+        "2618",
+        "2412",
         "1216",
         "2603"
       ]
